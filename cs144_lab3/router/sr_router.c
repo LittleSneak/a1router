@@ -279,6 +279,10 @@ void sr_handlepacket(struct sr_instance* sr,
 	  printf("here\n");
 	  fflush(stdout);
 	  arp_hdr = (sr_arp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
+	  printf("got header\n");
+	  fflush(stdout);
+	  print_hdrs(packet, len);
+	  fflush(stdout);
 	  /*Handle arp request*/
 	  if(arp_hdr->ar_op == arp_op_request){
 		  printf("here\n");
@@ -376,7 +380,8 @@ void sr_handlepacket(struct sr_instance* sr,
 	  
 	  /*arp packet is a reply*/
 	  else{
-		  
+		  printf("reply\n");
+		  fflush(stdout);
 		  /*check if the reply is for this router*/
 		  if_walker = sr->if_list;
 		  located = 0;
