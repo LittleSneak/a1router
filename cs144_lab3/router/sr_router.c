@@ -143,7 +143,8 @@ void sr_handlepacket(struct sr_instance* sr,
 	  }
 	  type = 2;
   }
-  
+  printf("here\n");
+  fflush(stdout);
   /*Handle IP packet or an ICMP packet*/
   if(type == 0 || type == 1){
 	  /*Obtain ip header*/
