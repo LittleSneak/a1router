@@ -297,7 +297,7 @@ void sr_handlepacket(struct sr_instance* sr,
 			  retARPhdr = (sr_arp_hdr_t *) (reply + sizeof(sr_ethernet_hdr_t));
 			  /*Setup ethernet header*/
 			  memcpy(retEhdr->ether_shost, if_walker->addr, sizeof(uint8_t) * 6);
-			  memcpy(retEhdr->ether_dhost, ehdr->ether_dhost, sizeof(uint8_t) * 6);
+			  memcpy(retEhdr->ether_dhost, ehdr->ether_shost, sizeof(uint8_t) * 6);
 			  retEhdr->ether_type = htons(ethertype_arp);
 			  /*Setup ARP header*/
 			  memcpy(retARPhdr, arp_hdr, sizeof(sr_arp_hdr_t));
