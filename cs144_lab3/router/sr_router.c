@@ -78,7 +78,6 @@ void sr_handlepacket(struct sr_instance* sr,
   assert(interface);
 
   printf("*** -> Received packet of length %d \n",len);
-  print_hdrs(packet, len);
 
   /* fill in code here */
   /*Perform minimum packet length checks*/
@@ -309,18 +308,18 @@ void sr_handlepacket(struct sr_instance* sr,
 			  retARPhdr->ar_op = htons(arp_op_reply);
 			  
 			  /*Find interface*/
-			  rt_walker = sr->routing_table;
-			  while(rt_walker){
-				  if(rt_walker->dest.s_addr == retARPhdr->ar_tip){
-					  break;
-				  }
-				  rt_walker = rt_walker->next;
-			  }
+			  if_walker = sr->if_list;
+		      while(if_walker){
+			      if(memcmp(if_walker->addr, ehdr->ether_dhost, sizeof(unsigned char) * 6) == 0){
+				      break;
+			      }
+			      if_walker = if_walker->next;
+		      }
 			  /*Send the packet*/
 			  sr_send_packet(sr /* borrowed */,
                          reply /* borrowed */ ,
                          sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t),
-                         rt_walker->interface);
+                         if_walker->name);
 			  /*print_hdrs(reply, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));*/
 			  /*print_hdrs(packet, len);*/
 			  free(reply);
