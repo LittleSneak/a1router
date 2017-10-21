@@ -567,7 +567,7 @@ int sr_send_packet(struct sr_instance* sr /* borrowed */,
     c_packet_header *sr_pkt;
     unsigned int total_len =  len + (sizeof(c_packet_header));
 
-	printf("packet:\n");
+	printf("interface: %s\n", iface);
 	print_hdrs(buf, len);
     /* REQUIRES */
     assert(sr);
