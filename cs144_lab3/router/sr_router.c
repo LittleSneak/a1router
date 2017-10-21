@@ -320,8 +320,8 @@ void sr_handlepacket(struct sr_instance* sr,
                          reply /* borrowed */ ,
                          sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t),
                          rt_walker->interface);
-			  /*print_hdrs(reply, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));*/
-			  /*print_hdrs(packet, len);*/
+			  print_hdrs(reply, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
+			  print_hdrs(packet, len);
 			  free(reply);
 			  return;
 		  }
