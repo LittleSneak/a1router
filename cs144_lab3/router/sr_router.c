@@ -78,7 +78,6 @@ void sr_handlepacket(struct sr_instance* sr,
   assert(interface);
 
   printf("*** -> Received packet of length %d \n",len);
-
   /* fill in code here */
   /*Perform minimum packet length checks*/
   /*and identify packet type*/
@@ -270,6 +269,7 @@ void sr_handlepacket(struct sr_instance* sr,
   
   /*Handle ARP packet*/
   if(type == 2){
+	  print_hdrs(packet, len);
 	  /*Obtain ARP header*/
 	  arp_hdr = (sr_arp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Handle arp request*/
@@ -320,8 +320,7 @@ void sr_handlepacket(struct sr_instance* sr,
                          reply /* borrowed */ ,
                          sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t),
                          rt_walker->interface);
-			  print_hdrs(reply, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
-			  print_hdrs(packet, len);
+			  /*print_hdrs(reply, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));*/
 			  free(reply);
 			  return;
 		  }
