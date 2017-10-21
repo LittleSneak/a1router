@@ -276,13 +276,7 @@ void sr_handlepacket(struct sr_instance* sr,
   /*Handle ARP packet*/
   if(type == 2){
 	  /*Obtain ARP header*/
-	  printf("here\n");
-	  fflush(stdout);
 	  arp_hdr = (sr_arp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
-	  printf("%hu\n", arp_hdr->ar_op);
-	  fflush(stdout);
-	  print_hdrs(packet, len);
-	  fflush(stdout);
 	  /*Handle arp request*/
 	  if(arp_hdr->ar_op == 0x0001){
 		  printf("here\n");
@@ -392,7 +386,8 @@ void sr_handlepacket(struct sr_instance* sr,
 			  }
 			  if_walker = if_walker->next;
 		  }
-		  
+		  printf("reply\n");
+		  fflush(stdout);
 		  /*Find the interface for this IP address*/
 		  rt_walker = sr->routing_table;
 	      while(rt_walker){
@@ -401,7 +396,8 @@ void sr_handlepacket(struct sr_instance* sr,
 		      }
 		      rt_walker = rt_walker->next;
 	      }
-		  
+		  printf("reply\n");
+		  fflush(stdout);
 		  /*Reply is for this router, cache the reply*/
 		  if(located == 1){
 			  struct sr_arpreq *requests =  sr_arpcache_insert(&(sr->cache),
