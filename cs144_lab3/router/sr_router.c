@@ -106,7 +106,8 @@ void sr_handlepacket(struct sr_instance* sr,
   if(len < minlength){
 	  return;
   }
-  
+  printf("here\n");
+  fflush(stdout);
   /*Obtain ethernet header*/
   else{
 	  ehdr = (sr_ethernet_hdr_t *)packet;
@@ -134,7 +135,8 @@ void sr_handlepacket(struct sr_instance* sr,
 		  }
 	  }
   }
-  
+  printf("here\n");
+  fflush(stdout);
   /*ARP packet*/
   else if(ethtype == ethertype_arp){
 	  minlength = minlength + sizeof(sr_arp_hdr_t);
