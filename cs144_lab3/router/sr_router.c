@@ -279,7 +279,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	  printf("here\n");
 	  fflush(stdout);
 	  arp_hdr = (sr_arp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
-	  printf("got header\n");
+	  printf("%hu\n", arp_hdr->ar_op);
 	  fflush(stdout);
 	  print_hdrs(packet, len);
 	  fflush(stdout);
