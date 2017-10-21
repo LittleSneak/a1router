@@ -141,9 +141,6 @@ void sr_handlepacket(struct sr_instance* sr,
 	  type = 2;
   }
   
-  printf("%d\n", type);
-  print_hdrs(packet, len);
-  fflush(stdout);
   /*Handle IP packet or an ICMP packet*/
   if(type == 0 || type == 1){
 	  print_hdrs(packet, len);
@@ -279,10 +276,13 @@ void sr_handlepacket(struct sr_instance* sr,
   /*Handle ARP packet*/
   if(type == 2){
 	  /*Obtain ARP header*/
+	  printf("here\n");
+	  fflush(stdout);
 	  arp_hdr = (sr_arp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Handle arp request*/
 	  if(arp_hdr->ar_op == arp_op_request){
-		  
+		  printf("here\n");
+	      fflush(stdout);
 		  /*check if the request is for this router*/
 		  if_walker = sr->if_list;
 		  located = 0;
@@ -293,9 +293,12 @@ void sr_handlepacket(struct sr_instance* sr,
 			  }
 			  if_walker = if_walker->next;
 		  }
-		  
+		  printf("here\n");
+	      fflush(stdout);
 		  /*Request is for this router, send a reply*/
 		  if(located == 1){
+			  printf("located\n");
+	          fflush(stdout);
 			  reply = malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
 			  retEhdr = (sr_ethernet_hdr_t *) reply;
 			  retARPhdr = (sr_arp_hdr_t *) (reply + sizeof(sr_ethernet_hdr_t));
@@ -327,6 +330,8 @@ void sr_handlepacket(struct sr_instance* sr,
 		  
 		  /*destination is not for this router, forward the packet*/
 		  else{
+			  printf("not located\n");
+	          fflush(stdout);
 			  rt_walker = sr->routing_table;
 			  while(rt_walker){
 				  if(rt_walker->dest.s_addr == retARPhdr->ar_tip){
@@ -334,6 +339,8 @@ void sr_handlepacket(struct sr_instance* sr,
 				  }
 				  rt_walker = rt_walker->next;
 			  }
+			  printf("here\n");
+	          fflush(stdout);
 			  if(!rt_walker){
 		          /*Check arp cache*/
 		          arpentry = sr_arpcache_lookup(&(sr->cache), rt_walker->dest.s_addr);
