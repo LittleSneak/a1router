@@ -144,6 +144,8 @@ void sr_handlepacket(struct sr_instance* sr,
 
   /*Handle IP packet or an ICMP packet*/
   if(type == 0 || type == 1){
+	  print_hdrs(packet, len);
+	  fflush(stdout);
 	  /*Obtain ip header*/
 	  iphdr = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Check the checksum*/
@@ -152,8 +154,6 @@ void sr_handlepacket(struct sr_instance* sr,
 	  if(cksum(iphdr, sizeof(sr_ip_hdr_t)) != 0){
 		  return;
 	  }
-	  printf("here\n");
-	  fflush(stdout);
 	  /*Check if packet is meant for the router*/
 	  int found = 0;
 	  while (if_walker){
