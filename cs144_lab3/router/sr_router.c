@@ -145,6 +145,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	  iphdr = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Check the checksum*/
 	  if(cksum(iphdr, sizeof(sr_ip_hdr_t)) != 0){
+		  printf("Checksum failed\n");
 		  return;
 	  }
 	  /*Check if packet is meant for the router*/
