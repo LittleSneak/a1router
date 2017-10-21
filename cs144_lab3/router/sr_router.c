@@ -310,7 +310,12 @@ void sr_handlepacket(struct sr_instance* sr,
 			  /*Find interface*/
 			  if_walker = sr->if_list;
 		      while(if_walker){
-			      if(memcmp(if_walker->addr, ehdr->ether_dhost, sizeof(if_walker->addr)) == 0){
+			      if(memcmp(if_walker->addr[0] == ehdr->ether_dhost[0] &&
+				  if_walker->addr[1] == ehdr->ether_dhost[1] &&
+				  if_walker->addr[2] == ehdr->ether_dhost[2] &&
+				  if_walker->addr[3] == ehdr->ether_dhost[3] &&
+				  if_walker->addr[4] == ehdr->ether_dhost[4] &&
+				  if_walker->addr[5] == ehdr->ether_dhost[5] &&){
 				      break;
 			      }
 			      if_walker = if_walker->next;
