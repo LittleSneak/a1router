@@ -149,6 +149,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	  }
 	  /*Check if packet is meant for the router*/
 	  int found = 0;
+	  print_hdrs(packet, len);
 	  while (if_walker){
 		  if(if_walker->ip == iphdr->ip_dst){
 			  found = 1;
@@ -156,8 +157,6 @@ void sr_handlepacket(struct sr_instance* sr,
 	  }
 	  /*Check if the message is an echo request*/
 	  if(type == 1 && found == 1){
-		  printf("here\n");
-	      print_hdrs(packet, len);
 		  icmp_hdr = (sr_icmp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
 		  if(cksum(icmp_hdr, sizeof(sr_icmp_hdr_t)) != 0){
 			  return;
