@@ -103,17 +103,18 @@ void sr_handlepacket(struct sr_instance* sr,
   struct sr_arpentry* arpentry = NULL;
   
   int minlength = sizeof(sr_ethernet_hdr_t);
+  printf("here\n");
+  fflush(stdout);
   if(len < minlength){
 	  return;
   }
-  printf("here\n");
-  fflush(stdout);
   /*Obtain ethernet header*/
   else{
 	  ehdr = (sr_ethernet_hdr_t *)packet;
   }
   uint16_t ethtype = ethertype(packet);
-  
+  printf("here\n");
+  fflush(stdout);
   /*Found an IP header after the ethernet header*/
   if (ethtype == ethertype_ip) {
 	  minlength = minlength + sizeof(sr_ip_hdr_t);
@@ -135,8 +136,6 @@ void sr_handlepacket(struct sr_instance* sr,
 		  }
 	  }
   }
-  printf("here\n");
-  fflush(stdout);
   /*ARP packet*/
   else if(ethtype == ethertype_arp){
 	  minlength = minlength + sizeof(sr_arp_hdr_t);
