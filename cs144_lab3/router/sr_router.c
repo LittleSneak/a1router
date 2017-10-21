@@ -141,8 +141,6 @@ void sr_handlepacket(struct sr_instance* sr,
   
   /*Handle IP packet or an ICMP packet*/
   if(type == 0 || type == 1){
-	  printf("here\n");
-	  print_hdrs(packet, len);
 	  /*Obtain ip header*/
 	  iphdr = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Check the checksum*/
@@ -164,6 +162,8 @@ void sr_handlepacket(struct sr_instance* sr,
 		  }
 		  /*Handle echo requests*/
 		  if(icmp_hdr->icmp_type == 8 && found == 1){
+			  printf("here\n");
+	          print_hdrs(packet, len);
 			  uint8_t *reply = malloc(len);
 			  memcpy(reply, packet, len);
 			  retEhdr = (sr_ethernet_hdr_t *)reply;
