@@ -278,7 +278,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	  /*Obtain ARP header*/
 	  arp_hdr = (sr_arp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Handle arp request*/
-	  if(arp_hdr->ar_op == 1){
+	  if(ntohs(arp_hdr->ar_op) == 1){
 		  printf("here\n");
 	      fflush(stdout);
 		  /*check if the request is for this router*/
