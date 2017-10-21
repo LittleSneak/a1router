@@ -103,8 +103,6 @@ void sr_handlepacket(struct sr_instance* sr,
   struct sr_arpentry* arpentry = NULL;
   
   int minlength = sizeof(sr_ethernet_hdr_t);
-  printf("here\n");
-  fflush(stdout);
   if(len < minlength){
 	  return;
   }
@@ -113,8 +111,6 @@ void sr_handlepacket(struct sr_instance* sr,
 	  ehdr = (sr_ethernet_hdr_t *)packet;
   }
   uint16_t ethtype = ethertype(packet);
-  printf("here\n");
-  fflush(stdout);
   /*Found an IP header after the ethernet header*/
   if (ethtype == ethertype_ip) {
 	  minlength = minlength + sizeof(sr_ip_hdr_t);
@@ -144,8 +140,8 @@ void sr_handlepacket(struct sr_instance* sr,
 	  }
 	  type = 2;
   }
-  printf("here\n");
-  fflush(stdout);
+  
+
   /*Handle IP packet or an ICMP packet*/
   if(type == 0 || type == 1){
 	  /*Obtain ip header*/
@@ -154,7 +150,8 @@ void sr_handlepacket(struct sr_instance* sr,
 	  if(cksum(iphdr, sizeof(sr_ip_hdr_t)) != 0){
 		  return;
 	  }
-	  
+	  printf("here\n");
+	  fflush(stdout);
 	  /*Check if packet is meant for the router*/
 	  int found = 0;
 	  while (if_walker){
@@ -162,13 +159,16 @@ void sr_handlepacket(struct sr_instance* sr,
 			  found = 1;
 	      }
 	  }
-	  
+	  printf("here\n");
+	  fflush(stdout);
 	  /*Check if the message is an echo request*/
 	  if(type == 1 && found == 1){
 		  icmp_hdr = (sr_icmp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
 		  if(cksum(icmp_hdr, sizeof(sr_icmp_hdr_t)) != 0){
 			  return;
 		  }
+		  printf("here\n");
+	      fflush(stdout);
 		  /*Handle echo requests*/
 		  if(icmp_hdr->icmp_type == 8 && found == 1){
 			  uint8_t *reply = malloc(len);
