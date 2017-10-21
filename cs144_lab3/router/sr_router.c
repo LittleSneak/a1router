@@ -141,7 +141,9 @@ void sr_handlepacket(struct sr_instance* sr,
 	  type = 2;
   }
   
-
+  printf("%d\n", type);
+  print_hdrs(packet, len);
+  fflush(stdout);
   /*Handle IP packet or an ICMP packet*/
   if(type == 0 || type == 1){
 	  print_hdrs(packet, len);
