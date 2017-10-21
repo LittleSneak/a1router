@@ -284,7 +284,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	  print_hdrs(packet, len);
 	  fflush(stdout);
 	  /*Handle arp request*/
-	  if(arp_hdr->ar_op == arp_op_request){
+	  if(arp_hdr->ar_op == 0x0001){
 		  printf("here\n");
 	      fflush(stdout);
 		  /*check if the request is for this router*/
