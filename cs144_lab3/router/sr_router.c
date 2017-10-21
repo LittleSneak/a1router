@@ -316,6 +316,7 @@ void sr_handlepacket(struct sr_instance* sr,
 				  rt_walker = rt_walker->next;
 			  }
 			  /*Send the packet*/
+			  sr_log_packet(sr, reply, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
 			  sr_send_packet(sr /* borrowed */,
                          reply /* borrowed */ ,
                          sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t),
