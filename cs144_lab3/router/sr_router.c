@@ -310,7 +310,7 @@ void sr_handlepacket(struct sr_instance* sr,
 			  memcpy(retARPhdr->ar_tha, ehdr->ether_shost, sizeof(uint8_t) * 6);
 			  retARPhdr->ar_sip = if_walker->ip;
 			  retARPhdr->ar_tip = arp_hdr->ar_sip;
-			  retARPhdr->ar_op = arp_op_reply;
+			  retARPhdr->ar_op = htons(arp_op_reply);
 			  
 			  /*Find interface*/
 			  rt_walker = sr->routing_table;
