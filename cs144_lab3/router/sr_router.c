@@ -147,6 +147,8 @@ void sr_handlepacket(struct sr_instance* sr,
 	  /*Obtain ip header*/
 	  iphdr = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Check the checksum*/
+	  print_hdrs(packet, len);
+	  fflush(stdout);
 	  if(cksum(iphdr, sizeof(sr_ip_hdr_t)) != 0){
 		  return;
 	  }
