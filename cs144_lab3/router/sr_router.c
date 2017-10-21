@@ -308,23 +308,18 @@ void sr_handlepacket(struct sr_instance* sr,
 			  retARPhdr->ar_op = htons(arp_op_reply);
 			  
 			  /*Find interface*/
-			  if_walker = sr->if_list;
-		      while(if_walker){
-			      if(memcmp(if_walker->addr[0] == ehdr->ether_dhost[0] &&
-				  if_walker->addr[1] == ehdr->ether_dhost[1] &&
-				  if_walker->addr[2] == ehdr->ether_dhost[2] &&
-				  if_walker->addr[3] == ehdr->ether_dhost[3] &&
-				  if_walker->addr[4] == ehdr->ether_dhost[4] &&
-				  if_walker->addr[5] == ehdr->ether_dhost[5] &&){
-				      break;
-			      }
-			      if_walker = if_walker->next;
-		      }
+			  rt_walker = sr->routing_table;
+			  while(rt_walker){
+				  if(rt_walker->dest.s_addr == retARPhdr->ar_tip){
+					  break;
+				  }
+				  rt_walker = rt_walker->next;
+			  }
 			  /*Send the packet*/
 			  sr_send_packet(sr /* borrowed */,
                          reply /* borrowed */ ,
                          sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t),
-                         if_walker->name);
+                         rt_walker->interface);
 			  /*print_hdrs(reply, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));*/
 			  /*print_hdrs(packet, len);*/
 			  free(reply);
