@@ -535,6 +535,7 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		retICMPhdr->icmp_sum = cksum(retICMPhdr, sizeof(sr_icmp_t3_hdr_t));
 		/* Find interface */
 		rt_walker = sr->routing_table;
+		printf("PRINTING 2:\N");
 		while(rt_walker){
 			if(rt_walker->dest.s_addr == retIPhdr->ip_dst){
 				break;
@@ -545,6 +546,7 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 			return;
 		}
 		/* Find the source ip */
+		printf("PRINTING 3:\N");
 		while(if_walker){
 			if(strcmp(if_walker->name, rt_walker->interface) == 0){
 				break;
@@ -557,7 +559,7 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		retIPhdr->ip_src = if_walker->ip;
 		retIPhdr->ip_sum = cksum(retIPhdr, sizeof(sr_ip_hdr_t));
 		memcpy(retEhdr->ether_shost, if_walker->addr, sizeof(uint8_t) * 6);
-		printf("PRINTING REPLY:\N");
+		printf("PRINTING 4:\N");
 		print_hdrs(reply, len);
 		sr_send_packet(sr,
                        reply,
