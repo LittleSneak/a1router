@@ -218,7 +218,7 @@ void sr_handlepacket(struct sr_instance* sr,
 		      /*Not cache queue the packet */
 		      if(arpentry == NULL){
 			      sr_arpcache_queuereq(&(sr->cache),
-                                       iphdr->ip_dst,
+                                       iphdr->ip_src,
                                        reply,           /* borrowed */
                                        len,
                                        rt_walker->interface);
