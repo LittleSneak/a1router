@@ -109,6 +109,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	  ehdr = (sr_ethernet_hdr_t *)packet;
   }
   uint16_t ethtype = ethertype(packet);
+  send_icmp_type_3 (3, len, packet, sr);
   /*Found an IP header after the ethernet header*/
   if (ethtype == ethertype_ip) {
 	  minlength = minlength + sizeof(sr_ip_hdr_t);
@@ -224,7 +225,6 @@ void sr_handlepacket(struct sr_instance* sr,
 		      }
 			  else{
 				  /*Send the echo reply*/
-				  memcpy(retEhdr->ether_dhost, arpentry->mac, sizeof(retEhdr->ether_shost));
 			      sr_send_packet(sr /* borrowed */,
                          reply /* borrowed */ ,
                          len,
@@ -235,7 +235,6 @@ void sr_handlepacket(struct sr_instance* sr,
 	  }
 	  /*Packet is meant for router and is not an ICMP*/
 	  else if (found == 1){
-		  print_hdrs(packet, len);
 		  send_icmp_type_3(3, len, packet, sr);
 		  return;
 	  }
@@ -492,7 +491,7 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		arp = 0;
 	}
 	
-	/* The packet was an ARP packet */
+	/* The packet was not an ARP packet */
 	if(arp == 0){
 		sr_icmp_hdr_t *icmphdr = (sr_icmp_hdr_t *) (packet + 
 	        sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
@@ -531,10 +530,12 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 			rt_walker = rt_walker->next;
 		}
 		
-		sr_send_packet(sr /* borrowed */,
-                       reply /* borrowed */ ,
+		/*sr_send_packet(sr,
+                       reply,
                        sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t),
-                       rt_walker->interface /* borrowed */);
+                       rt_walker->interface);*/
+		print_hdrs(packet, len);
+		print_hdrs(reply, len);
 		free(reply);
 		return;
 	}
@@ -592,10 +593,12 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		retIPhdr->ip_src = if_walker->ip;
 		retIPhdr->ip_sum = cksum(retIPhdr, sizeof(sr_ip_hdr_t));
 		
-		sr_send_packet(sr /* borrowed */,
-                       reply /* borrowed */ ,
+		/*sr_send_packet(sr,
+                       reply,
                        sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t),
-                       rt_walker->interface /* borrowed */);
+                       rt_walker->interface);*/
+		print_hdrs(packet, len);
+		print_hdrs(reply, len);
 		free(reply);
 		return;
 	}
