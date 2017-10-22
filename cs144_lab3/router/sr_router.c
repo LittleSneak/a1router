@@ -241,7 +241,7 @@ void sr_handlepacket(struct sr_instance* sr,
 		  retIPhdr->ip_ttl = 64;
 		  retIPhdr->ip_sum = 0;
 		  retIPhdr->ip_dst = iphdr->ip_src;
-		  retIPhdr->ip_proto = htons(ip_protocol_icmp);
+		  retIPhdr->ip_p = htons(ip_protocol_icmp);
 		  
 		  /* Find the interface to send to */
 		  if_walker = sr->if_list;
