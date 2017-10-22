@@ -599,8 +599,6 @@ int sr_send_packet(struct sr_instance* sr /* borrowed */,
         free(sr_pkt);
         return -1;
     }
-	printf("No errors sending\n");
-	fflush(stdout);
     free(sr_pkt);
 
     return 0;
