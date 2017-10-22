@@ -356,15 +356,11 @@ void sr_handlepacket(struct sr_instance* sr,
 	  
 	  /*arp packet is a reply*/
 	  else{
-		  printf("replied to\n");
-		  fflush(stdout);
 		  /*check if the reply is for this router*/
 		  if_walker = sr->if_list;
 		  located = 0;
 		  while(if_walker){
 			  if(if_walker->ip == arp_hdr->ar_tip){
-				  printf("located\n");
-				  fflush(stdout);
 				  located = 1;
 				  break;
 			  }
@@ -380,6 +376,8 @@ void sr_handlepacket(struct sr_instance* sr,
 	      }
 		  /*Reply is for this router, cache the reply*/
 		  if(located == 1){
+			  printf("replied to\n");
+		      fflush(stdout);
 			  struct sr_arpreq *requests =  sr_arpcache_insert(&(sr->cache),
                                          arp_hdr->ar_sha,
                                          arp_hdr->ar_sip);
