@@ -141,6 +141,7 @@ void sr_handlepacket(struct sr_instance* sr,
   
   /*Handle IP packet or an ICMP packet*/
   if(type == 0 || type == 1){
+	  print_addr_ip_int(iphdr->ip_dst);
 	  /*Obtain ip header*/
 	  iphdr = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Check the checksum*/
@@ -158,7 +159,6 @@ void sr_handlepacket(struct sr_instance* sr,
 	  if_walker = sr->if_list;
 	  while (if_walker){
 		  if(if_walker->ip == iphdr->ip_dst){
-			  printf("found");
 			  found = 1;
 	      }
 		  if_walker = if_walker->next;
