@@ -507,20 +507,21 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		sr_ip_hdr_t *iphdr = (sr_ip_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t));
 		sr_icmp_hdr_t *icmphdr = (sr_icmp_hdr_t *) (packet + 
 	        sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
-			
+		printf("PRINTING 2:\N");
 		/* Set up IP header */
 		memcpy(retIPhdr, iphdr, sizeof(sr_ip_hdr_t));
 		retIPhdr->ip_p = ip_protocol_icmp;
 		retIPhdr->ip_dst = iphdr->ip_src;
 		retIPhdr->ip_sum = 0;
 		retIPhdr->ip_ttl = 64;
-		
+		printf("PRINTING 2:\N");
 		/* Set up the ICMP header */
 		retICMPhdr->icmp_type = 3;
 		retICMPhdr->icmp_code = code;
 		retICMPhdr->icmp_sum = 0;
 		retICMPhdr->unused = 0;
 		retICMPhdr->next_mtu = 0;
+		printf("PRINTING 2:\N");
 		/* Decide how many bytes to read into the data array */
 		int size_of_data = len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t);
 		int bytes_to_read = 0;
