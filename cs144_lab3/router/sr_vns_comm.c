@@ -581,8 +581,12 @@ int sr_send_packet(struct sr_instance* sr /* borrowed */,
     sr_pkt = (c_packet_header *)malloc(len +
             sizeof(c_packet_header));
     assert(sr_pkt);
+	print_hdrs(buf, len);
+	fflush(stdout);
     sr_pkt->mLen  = htonl(total_len);
     sr_pkt->mType = htonl(VNSPACKET);
+	printf("Here\n");
+	fflush(stdout);
     strncpy(sr_pkt->mInterfaceName,iface,16);
     memcpy(((uint8_t*)sr_pkt) + sizeof(c_packet_header),
             buf,len);
