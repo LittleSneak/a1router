@@ -161,6 +161,7 @@ void sr_handlepacket(struct sr_instance* sr,
 		  if(if_walker->ip == iphdr->ip_dst){
 			  found = 1;
 	      }
+		  if_walker = if_walker->next;
 	  }
 	  /*Check if the message is an echo request*/
 	  if(type == 1 && found == 1){
