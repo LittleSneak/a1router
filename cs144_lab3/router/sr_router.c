@@ -254,9 +254,6 @@ void sr_handlepacket(struct sr_instance* sr,
 				  }
 				  if_walker = if_walker->next;
 			  }
-			  printf("IF: %s, Source: \n", rt_walker->interface);
-			  print_addr_eth(ehdr->ether_shost);
-			  fflush(stdout);
 			  memcpy(ehdr->ether_shost, if_walker->addr, sizeof(uint8_t) * 6);
 			  sr_send_packet(sr, packet, len, rt_walker->interface);
 			  free(arpentry);
