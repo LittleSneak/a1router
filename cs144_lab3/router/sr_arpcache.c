@@ -18,30 +18,18 @@
 */
 void sr_arpcache_sweepreqs(struct sr_instance *sr) { 
     /* Fill this in */
-	printf("e0\n");
-	fflush(stdout);
 	struct sr_arpreq *req_walker = sr->cache.requests;
 	struct sr_arpreq *req_walker_next = NULL;
-	printf("e1\n");
-	fflush(stdout);
 	while(req_walker){
-		printf("e2\n");
-	    fflush(stdout);
 		req_walker_next = req_walker->next;
 		handle_arpreq(sr, req_walker);
 		req_walker = req_walker_next;
-		printf("e2.5\n");
-	    fflush(stdout);
 	}
-	printf("e3\n");
-	fflush(stdout);
 }
 
 /* Function for sending an ARP request for a given request
  */
 void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
-	printf("here0");
-	fflush(stdout);
 	time_t now;
 	time(&now);
 	/*Packet that will be sent*/
@@ -64,8 +52,6 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
 		/* Send a request */
 		else{
 			/*Initialize the packet and headers*/
-			printf("here1");
-			fflush(stdout);
 			reply = malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
 			retEhdr = (sr_ethernet_hdr_t *) reply;
 			retARPhdr = (sr_arp_hdr_t *) (reply + sizeof(sr_ethernet_hdr_t));
@@ -93,8 +79,7 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
 			retEhdr->ether_dhost[3] = 255;
 			retEhdr->ether_dhost[4] = 255;
 			retEhdr->ether_dhost[5] = 255;
-			printf("here2");
-			fflush(stdout);
+
 			/*Set up ARP header*/
 			retARPhdr->ar_hrd = htons(arp_hrd_ethernet);
 			retARPhdr->ar_pro = htons(0x0800);
@@ -116,13 +101,9 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
 			print_hdrs(reply, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
 			/* Update information in request */
 			time(&now);
-			printf("here3");
-			fflush(stdout);
 			request->sent = now;
 			request->times_sent = request->times_sent + 1;
 			free(reply);
-			printf("here4");
-			fflush(stdout);
 		}
 	}
 	return;
