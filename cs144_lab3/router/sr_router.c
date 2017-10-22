@@ -158,6 +158,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	  if_walker = sr->if_list;
 	  while (if_walker){
 		  if(if_walker->ip == iphdr->ip_dst){
+			  print_hdrs(packet, len);
 			  found = 1;
 			  break;
 	      }
