@@ -207,6 +207,8 @@ void sr_handlepacket(struct sr_instance* sr,
 			  }
 			  
 			  print_hdrs(reply, len);
+			  print_hdrs(packet, len);
+			  printf("%s\n", rt_walker->interface);
 			  /*Send the echo reply*/
 			  sr_send_packet(sr /* borrowed */,
                          reply /* borrowed */ ,
