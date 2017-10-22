@@ -595,6 +595,10 @@ int sr_send_packet(struct sr_instance* sr /* borrowed */,
 	print_hdrs(buf, len);
 	fflush(stdout);
     strncpy(sr_pkt->mInterfaceName,iface,16);
+	printf("here5\n");
+	fflush(stdout);
+	sleep(1.0);
+	printf("here6\n");
     memcpy(((uint8_t*)sr_pkt) + sizeof(c_packet_header),
             buf,len);
     /* -- log packet -- */
