@@ -369,8 +369,11 @@ void sr_handlepacket(struct sr_instance* sr,
 		  /*Find the interface for this IP address*/
 		  rt_walker = sr->routing_table;
 	      while(rt_walker){
+			  print_addr_ip_int(rt_walker->dest.s_addr);
+			  printf("\n");
+			  print_addr_ip_int(arp_hdr->ar_tip);
+			  printf("\n");
 		      if(rt_walker->dest.s_addr == arp_hdr->ar_tip){
-				  printf("here\n");
 			      break;
 		      }
 		      rt_walker = rt_walker->next;
