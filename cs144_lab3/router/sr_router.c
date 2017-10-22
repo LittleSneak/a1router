@@ -250,8 +250,8 @@ void sr_handlepacket(struct sr_instance* sr,
 			  }
 			  if_walker = if_walker->next;
 		  }
-		  print_hdr_eth(if_walker->addr);
-		  print_hdr_eth(ehdr->ether_dhost);
+		  print_addr_eth(if_walker->addr);
+		  print_addr_eth(ehdr->ether_dhost);
 		  return;
 	  }
 	  
