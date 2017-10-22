@@ -167,7 +167,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	  if(type == 1 && found == 1){
 		  icmp_hdr = (sr_icmp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
 		  sum = icmp_hdr->icmp_sum;
-		  printf("%u %u\n", sum, cksum(icmp_hdr, sizeof(sr_icmp_hdr_t)));
+		  printf("%u %u\n", sum, cksum(icmp_hdr, sizeof(sr_icmp_hdr_t) + 8));
 		  if(cksum(icmp_hdr, sizeof(sr_icmp_hdr_t)) != sum){
 			  printf("Checksum failed\n");
 			  return;
