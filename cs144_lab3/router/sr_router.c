@@ -384,6 +384,8 @@ void sr_handlepacket(struct sr_instance* sr,
 			  while(req_walker != NULL){
 				  printf("replied to\n");
 		          fflush(stdout);
+				  print_hdrs(req_walker->buf, req_walker->len);
+				  fflush(stdout);
 				  ehdr = (sr_ethernet_hdr_t *) req_walker->buf;
 				  memcpy(ehdr->ether_dhost, arp_hdr->ar_sha, sizeof(ehdr->ether_dhost));
 				  sr_send_packet(sr /* borrowed */,
