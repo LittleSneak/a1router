@@ -78,8 +78,6 @@ void sr_handlepacket(struct sr_instance* sr,
   assert(interface);
 
   printf("*** -> Received packet of length %d \n",len);
-  print_hdrs(packet, len);
-  fflush(stdout);
   /* fill in code here */
   /*Perform minimum packet length checks*/
   /*and identify packet type*/
@@ -358,11 +356,15 @@ void sr_handlepacket(struct sr_instance* sr,
 	  
 	  /*arp packet is a reply*/
 	  else{
+		  printf("replied to\n");
+		  fflush(stdout);
 		  /*check if the reply is for this router*/
 		  if_walker = sr->if_list;
 		  located = 0;
 		  while(if_walker){
 			  if(if_walker->ip == arp_hdr->ar_tip){
+				  printf("located\n");
+				  fflush(stdout);
 				  located = 1;
 				  break;
 			  }
