@@ -164,13 +164,13 @@ void sr_handlepacket(struct sr_instance* sr,
 	  /*Check if the message is an echo request*/
 	  if(type == 1 && found == 1){
 		  icmp_hdr = (sr_icmp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
-		  sum = sr_icmp_hdr->icmp_sum;
-		  sr_icmp_hdr->icmp_sum = 0;
+		  sum = sr_icmp_hdr_t->icmp_sum;
+		  sr_icmp_hdr_t->icmp_sum = 0;
 		  if(cksum(icmp_hdr, sizeof(sr_icmp_hdr_t)) != sum){
 			  return;
 		  }
 		  else{
-			  sr_icmp_hdr->icmp_sum = sum;
+			  sr_icmp_hdr_t->icmp_sum = sum;
 		  }
 		  /*Handle echo requests*/
 		  if(icmp_hdr->icmp_type == 8 && found == 1){
