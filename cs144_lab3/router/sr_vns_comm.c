@@ -566,7 +566,8 @@ int sr_send_packet(struct sr_instance* sr /* borrowed */,
 {
     c_packet_header *sr_pkt;
     unsigned int total_len =  len + (sizeof(c_packet_header));
-	print_hdrs(buf, len);
+	printf("1\n");
+	fflush(stdout);
 
     /* REQUIRES */
     assert(sr);
@@ -578,7 +579,8 @@ int sr_send_packet(struct sr_instance* sr /* borrowed */,
         fprintf(stderr , "** Error: packet is wayy to short \n");
         return -1;
     }
-
+printf("2\n");
+	fflush(stdout);
     /* Create packet */
     sr_pkt = (c_packet_header *)malloc(len +
             sizeof(c_packet_header));
@@ -588,7 +590,8 @@ int sr_send_packet(struct sr_instance* sr /* borrowed */,
     strncpy(sr_pkt->mInterfaceName,iface,16);
     memcpy(((uint8_t*)sr_pkt) + sizeof(c_packet_header),
             buf,len);
-
+printf("3\n");
+	fflush(stdout);
     /* -- log packet -- */
     sr_log_packet(sr,buf,len);
 
@@ -597,13 +600,15 @@ int sr_send_packet(struct sr_instance* sr /* borrowed */,
         free ( sr_pkt );
         return -1;
     }
-
+printf("4\n");
+	fflush(stdout);
     if( write(sr->sockfd, sr_pkt, total_len) < total_len ){
         fprintf(stderr, "Error writing packet\n");
         free(sr_pkt);
         return -1;
     }
-
+printf("5\n");
+	fflush(stdout);
     free(sr_pkt);
 
     return 0;
