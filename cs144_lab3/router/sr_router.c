@@ -370,6 +370,7 @@ void sr_handlepacket(struct sr_instance* sr,
 		  rt_walker = sr->routing_table;
 	      while(rt_walker){
 		      if(rt_walker->dest.s_addr == arp_hdr->ar_tip){
+				  printf("here\n");
 			      break;
 		      }
 		      rt_walker = rt_walker->next;
