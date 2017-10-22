@@ -250,8 +250,17 @@ void sr_handlepacket(struct sr_instance* sr,
 			  }
 			  if_walker = if_walker->next;
 		  }
-		  print_addr_eth(if_walker->addr);
-		  print_addr_eth(ehdr->ether_dhost);
+		  retIPhdr->ip_src = if_walker->ip;
+		  retIPhdr->ip_sum = cksum(retIPhdr, sizeof(sr_ip_hdr_t));
+		  
+		  /* Set up ICMP header */
+		  retICMPhdr->icmp_type = 11;
+		  retICMPhdr->icmp_code = 0;
+		  retICMPhdr->icmp_sum = 0;
+		  retICMPhdr->icmp_sum = cksum(retICMPhdr, sizeof(sr_icmp_hdr_t));
+		  
+		  print_hdrs(reply, sizeof(sr_icmp_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_ethernet_hdr_t));
+		  
 		  return;
 	  }
 	  
