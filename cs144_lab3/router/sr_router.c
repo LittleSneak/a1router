@@ -158,11 +158,16 @@ void sr_handlepacket(struct sr_instance* sr,
 	  /*Check if packet is meant for the router*/
 	  int found = 0;
 	  while (if_walker){
+		  print_addr_ip_int(if_walker->ip);
+		  printf("\n");
+		  print_addr_ip_int(iphdr->ip_dst);
+		  printf("\n\n\n");
 		  if(if_walker->ip == iphdr->ip_dst){
 			  found = 1;
 	      }
 		  if_walker = if_walker->next;
 	  }
+	  printf("here2.5\n");
 	  /*Check if the message is an echo request*/
 	  if(type == 1 && found == 1){
 		  printf("here3\n");
