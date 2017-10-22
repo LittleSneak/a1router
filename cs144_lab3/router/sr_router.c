@@ -260,8 +260,11 @@ void sr_handlepacket(struct sr_instance* sr,
 		  retICMPhdr->icmp_sum = 0;
 		  retICMPhdr->icmp_sum = cksum(retICMPhdr, sizeof(sr_icmp_hdr_t));
 		  
-		  print_hdrs(reply, sizeof(sr_icmp_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_ethernet_hdr_t));
-		  
+          sr_send_packet(sr /* borrowed */,
+                         reply /* borrowed */ ,
+                         sizeof(sr_icmp_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_ethernet_hdr_t),
+                         if_walker->name /* borrowed */);
+		  free(reply);
 		  return;
 	  }
 	  
@@ -466,7 +469,7 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, int arp,
 			
 		/* Set up IP header */
 		memcpy(retIPhdr, iphdr, sizeof(sr_ip_hdr_t));
-		retIPhdr->ip_p = htons(ip_protocol_icmp);
+		retIPhdr->ip_p = ip_protocol_icmp;
 		retIPhdr->ip_src = iphdr->ip_dst;
 		retIPhdr->ip_dst = iphdr->ip_src;
 		retIPhdr->ip_sum = 0;
@@ -518,7 +521,7 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, int arp,
 		retIPhdr->ip_id = 0;
 		retIPhdr->ip_off = 0;
 		retIPhdr->ip_ttl = 64;
-		retIPhdr->ip_p = htons(ip_protocol_icmp);
+		retIPhdr->ip_p = ip_protocol_icmp;
 		retIPhdr->ip_dst = arphdr->ar_sip;
 		retIPhdr->ip_sum = 0;
 		retIPhdr->ip_ttl = 64;
