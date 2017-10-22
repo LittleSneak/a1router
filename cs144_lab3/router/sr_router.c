@@ -140,8 +140,8 @@ void sr_handlepacket(struct sr_instance* sr,
   }
   
   /*Handle IP packet or an ICMP packet*/
-  printf("here1\n");
   if(type == 0 || type == 1){
+	  printf("Handling type %d\n", type);
 	  /*Obtain ip header*/
 	  iphdr = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Check the checksum*/
@@ -209,9 +209,6 @@ void sr_handlepacket(struct sr_instance* sr,
 				  rt_walker = rt_walker->next;
 			  }
 			  
-			  print_hdrs(reply, len);
-			  print_hdrs(packet, len);
-			  printf("%s\n", rt_walker->interface);
 			  /*Send the echo reply*/
 			  sr_send_packet(sr /* borrowed */,
                          reply /* borrowed */ ,
