@@ -77,7 +77,7 @@ void sr_handlepacket(struct sr_instance* sr,
   assert(packet);
   assert(interface);
 
-  /*printf("*** -> Received packet of length %d \n",len);*/
+  printf("*** -> Received packet of length %d \n",len);
   /* fill in code here */
   /*Perform minimum packet length checks*/
   /*and identify packet type*/
@@ -169,7 +169,6 @@ void sr_handlepacket(struct sr_instance* sr,
 		  
 		  /* Checksum is not working...
 		  sum = icmp_hdr->icmp_sum;
-		  printf("%u %u\n", sum, cksum(icmp_hdr, sizeof(sr_icmp_hdr_t) + 8));
 		  if(cksum(icmp_hdr, sizeof(sr_icmp_hdr_t)) != sum){
 			  printf("Checksum failed\n");
 			  return;
@@ -234,6 +233,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	  }
 	  /*Packet is meant for router and is not an ICMP*/
 	  else if (found == 1){
+		  printf("Not for this router\n");
 		  send_icmp_type_3(3, len, packet, sr);
 		  return;
 	  }
@@ -556,8 +556,6 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		retIPhdr->ip_src = if_walker->ip;
 		retIPhdr->ip_sum = cksum(retIPhdr, sizeof(sr_ip_hdr_t));
 		memcpy(retEhdr->ether_shost, if_walker->addr, sizeof(uint8_t) * 6);
-		printf("PRINTING 4:\n");
-		print_hdrs(reply, len);
 		sr_send_packet(sr,
                        reply,
                        sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t),
