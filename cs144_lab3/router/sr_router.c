@@ -529,8 +529,6 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		else{
 			bytes_to_read = ICMP_DATA_SIZE - sizeof(sr_ip_hdr_t);
 		}
-		printf("Byted to read: %d\n", bytes_to_read);
-		fflush(stdout);
 		memcpy(retICMPhdr->data, iphdr, sizeof(sr_ip_hdr_t) + bytes_to_read);
 		
 		retICMPhdr->icmp_sum = cksum(retICMPhdr, sizeof(sr_icmp_t3_hdr_t));
@@ -563,7 +561,6 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
                        reply,
                        sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t),
                        rt_walker->interface);
-		print_hdrs(reply, len);
 		free(reply);
 		return;
 	}
