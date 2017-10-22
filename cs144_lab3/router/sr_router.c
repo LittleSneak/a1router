@@ -225,7 +225,6 @@ void sr_handlepacket(struct sr_instance* sr,
 	  iphdr->ip_ttl = iphdr->ip_ttl - 1;
 	  /* Send an ICMP time out back */
 	  if(iphdr->ip_ttl == 0){
-		  print_hdrs(packet, len);
 		  /*Return ICMP time out*/
 		  reply = malloc(sizeof(sr_icmp_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_ethernet_hdr_t));
 		  retEhdr = (sr_ethernet_hdr_t *) reply;
@@ -245,8 +244,14 @@ void sr_handlepacket(struct sr_instance* sr,
 		  
 		  /* Find the interface to send to */
 		  if_walker = sr->if_list;
-		  
-		  
+		  while(if_walker){
+			  if(memcmp(if_walker->addr, ehdr->ether_dhost, sizeof(unsigned char) * 6)){
+				  break;
+			  }
+			  if_walker = if_walker->next;
+		  }
+		  print_hdr_eth(if_walker->addr);
+		  print_hdr_eth(ehdr->ether_dhost);
 		  return;
 	  }
 	  
