@@ -18,6 +18,7 @@
 */
 void sr_arpcache_sweepreqs(struct sr_instance *sr) { 
     /* Fill this in */
+	printf("sweeping\n");
 	struct sr_arpreq *req_walker = sr->cache.requests;
 	struct sr_arpreq *req_walker_next = NULL;
 	while(req_walker){
@@ -32,7 +33,7 @@ void sr_arpcache_sweepreqs(struct sr_instance *sr) {
 void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
 	time_t now;
 	time(&now);
-	
+	printf("Handling\n");
 	/*Packet that will be sent*/
 	uint8_t *reply = NULL;
 	sr_ethernet_hdr_t *retEhdr = NULL;
