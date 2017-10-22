@@ -143,7 +143,6 @@ void sr_handlepacket(struct sr_instance* sr,
   if(type == 0 || type == 1){
 	  /*Obtain ip header*/
 	  iphdr = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
-	  print_addr_ip_int(iphdr->ip_dst);
 	  /*Check the checksum*/
 	  uint16_t sum = iphdr->ip_sum;
 	  iphdr->ip_sum = 0;
@@ -160,6 +159,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	  while (if_walker){
 		  if(if_walker->ip == iphdr->ip_dst){
 			  found = 1;
+			  break;
 	      }
 		  if_walker = if_walker->next;
 	  }
@@ -179,7 +179,8 @@ void sr_handlepacket(struct sr_instance* sr,
 		  }*/
 		  /*Handle echo requests*/
 		  if(icmp_hdr->icmp_type == 8 && found == 1){
-			  uint8_t *reply = malloc(len);
+			  /* In cache, send packet */
+		      uint8_t *reply = malloc(len);
 			  memcpy(reply, packet, len);
 			  retEhdr = (sr_ethernet_hdr_t *)reply;
 			  retIPhdr = (sr_ip_hdr_t *) (reply + sizeof(sr_ethernet_hdr_t));
@@ -197,6 +198,7 @@ void sr_handlepacket(struct sr_instance* sr,
 			  
 			  /*Change values in ICMP*/
 			  retICMPhdr->icmp_type = 0;
+		      retICMPhdr->icmp_code = 0;
 			  retICMPhdr->icmp_sum = 0;
 			  retICMPhdr->icmp_sum = cksum(retICMPhdr, sizeof(sr_icmp_hdr_t));
 			  
@@ -208,20 +210,33 @@ void sr_handlepacket(struct sr_instance* sr,
 				  }
 				  rt_walker = rt_walker->next;
 			  }
-			  
-			  /*Send the echo reply*/
-			  sr_send_packet(sr /* borrowed */,
+			  if(rt_walker == NULL){
+				  return;
+			  }
+			  /* Check if address is in cache */
+			  arpentry = sr_arpcache_lookup(&(sr->cache), retIPhdr->ip_dst);
+		      /*Not cache queue the packet */
+		      if(arpentry == NULL){
+			      sr_arpcache_queuereq(&(sr->cache),
+                                       iphdr->ip_dst,
+                                       reply,           /* borrowed */
+                                       len,
+                                       rt_walker->interface);
+		      }
+			  else{
+				  /*Send the echo reply*/
+			      sr_send_packet(sr /* borrowed */,
                          reply /* borrowed */ ,
                          len,
                          rt_walker->interface);
-			  free(reply);
+			  }
 			  return;
 		  }
 	  }
 	  /*Packet is meant for router and is not an ICMP*/
 	  else if (found == 1){
 		  print_hdrs(packet, len);
-		  send_icmp_type_3(3, len, packet, 0, sr);
+		  send_icmp_type_3(3, len, packet, sr);
 		  return;
 	  }
 	  
@@ -254,6 +269,9 @@ void sr_handlepacket(struct sr_instance* sr,
 				  break;
 			  }
 			  if_walker = if_walker->next;
+		  }
+		  if(if_walker == NULL){
+			  return;
 		  }
 		  retIPhdr->ip_src = if_walker->ip;
 		  retIPhdr->ip_sum = cksum(retIPhdr, sizeof(sr_ip_hdr_t));
@@ -297,6 +315,9 @@ void sr_handlepacket(struct sr_instance* sr,
 					  break;
 				  }
 				  if_walker = if_walker->next;
+			  }
+			  if(if_walker == NULL){
+				  return;
 			  }
 			  memcpy(ehdr->ether_shost, if_walker->addr, sizeof(uint8_t) * 6);
 			  sr_send_packet(sr, packet, len, rt_walker->interface);
@@ -410,16 +431,14 @@ void sr_handlepacket(struct sr_instance* sr,
 	  else{
 		  /*check if the reply is for this router*/
 		  if_walker = sr->if_list;
-		  located = 0;
 		  while(if_walker){
 			  if(if_walker->ip == arp_hdr->ar_tip){
-				  located = 1;
 				  break;
 			  }
 			  if_walker = if_walker->next;
 		  }
 		  /*Reply is for this router, cache the reply*/
-		  if(located == 1){
+		  if(if_walker != NULL){
 			  struct sr_arpreq *requests =  sr_arpcache_insert(&(sr->cache),
                                          arp_hdr->ar_sha,
                                          arp_hdr->ar_sip);
@@ -429,6 +448,7 @@ void sr_handlepacket(struct sr_instance* sr,
 				  ehdr = (sr_ethernet_hdr_t *) req_walker->buf;
 				  memcpy(ehdr->ether_dhost, arp_hdr->ar_sha, sizeof(ehdr->ether_dhost));
 				  memcpy(ehdr->ether_shost, if_walker->addr, sizeof(ehdr->ether_dhost));
+				  
 				  sr_send_packet(sr /* borrowed */,
                          req_walker->buf /* borrowed */ ,
                          req_walker->len,
@@ -444,8 +464,9 @@ void sr_handlepacket(struct sr_instance* sr,
 }/* end sr_ForwardPacket */
 
 /* Sends a type 3 ICMP error  with a given code*/
-void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, int arp, struct sr_instance *sr){
+void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct sr_instance *sr){
 	
+	int arp = 1;
 	struct sr_rt* rt_walker = NULL;
 	struct sr_if* if_walker = NULL;
 	uint8_t *reply = malloc(sizeof(sr_ethernet_hdr_t) 
@@ -465,6 +486,11 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, int arp,
 	memcpy(retEhdr->ether_dhost, ehdr->ether_dhost, sizeof(uint8_t) * 6);
 	memcpy(retEhdr->ether_shost, ehdr->ether_shost, sizeof(uint8_t) * 6);
 	retEhdr->ether_type = ehdr->ether_type;
+	
+	/* Check if it is an arp packet */
+	if(ethertype(packet) == ethertype_ip){
+		arp = 0;
+	}
 	
 	/* The packet was an ARP packet */
 	if(arp == 0){

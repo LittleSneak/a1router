@@ -46,8 +46,11 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
 	/* Check if it's been at least 1 second since last request */
 	if(difftime(now, request->sent) > 1){
 		if(request->times_sent >= 5){
+			struct sr_packet *packet_walker = request->packets;
+			while(packet_walker){
+				send_icmp_type_3 (1, packet_walker->len, packet_walker->buf, sr);
+			}
 			sr_arpreq_destroy(&(sr->cache), request);
-			/*Send ICMP unreachable*/
 			return;
 		}
 		/* Send a request */

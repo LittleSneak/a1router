@@ -57,7 +57,7 @@ struct sr_instance
 };
 
 /* A helper function for sending type 3 ICMP errors */
-void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, int arp, struct sr_instance *sr);
+void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct sr_instance *sr);
 
 /* -- sr_main.c -- */
 int sr_verify_routing_table(struct sr_instance* sr);
