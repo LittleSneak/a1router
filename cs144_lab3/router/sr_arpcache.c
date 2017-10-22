@@ -17,6 +17,8 @@
   See the comments in the header file for an idea of what it should look like.
 */
 void sr_arpcache_sweepreqs(struct sr_instance *sr) { 
+printf("SWEEPINT1\n");
+	fflush(stdout);
     /* Fill this in */
 	struct sr_arpreq *req_walker = sr->cache.requests;
 	struct sr_arpreq *req_walker_next = NULL;
@@ -25,11 +27,15 @@ void sr_arpcache_sweepreqs(struct sr_instance *sr) {
 		handle_arpreq(sr, req_walker);
 		req_walker = req_walker_next;
 	}
+	printf("SWEEPINT2\n");
+	fflush(stdout);
 }
 
 /* Function for sending an ARP request for a given request
  */
 void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
+	printf("HANDLING1\n");
+	fflush(stdout);
 	time_t now;
 	time(&now);
 	/*Packet that will be sent*/
@@ -47,6 +53,8 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
 	if(difftime(now, request->sent) > 1){
 		if(request->times_sent >= 5){
 			/*Send ICMP unreachable*/
+			printf("HANDLING2\n");
+	        fflush(stdout);
 			return;
 		}
 		/* Send a request */
@@ -105,6 +113,8 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
 			free(reply);
 		}
 	}
+	printf("HANDLING2\n");
+	fflush(stdout);
 	return;
 }
 
