@@ -544,6 +544,7 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		}
 		/* Find the source ip */
 		printf("PRINTING 3:\n");
+		if_walker = sr->if_list;
 		while(if_walker){
 			if(strcmp(if_walker->name, rt_walker->interface) == 0){
 				break;
