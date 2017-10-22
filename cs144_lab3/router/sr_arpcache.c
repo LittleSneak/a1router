@@ -63,6 +63,7 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
 				if(strcmp(if_walker->name, request->packets->iface) == 0){
 					break;
 				}
+				if_walker = if_walker->next;
 			}
 			if(if_walker == NULL){
 				printf("interface not found\n");
