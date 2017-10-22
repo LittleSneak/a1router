@@ -566,8 +566,6 @@ int sr_send_packet(struct sr_instance* sr /* borrowed */,
 {
     c_packet_header *sr_pkt;
     unsigned int total_len =  len + (sizeof(c_packet_header));
-	printf("1\n");
-	fflush(stdout);
 
     /* REQUIRES */
     assert(sr);
@@ -584,10 +582,20 @@ printf("2\n");
     /* Create packet */
     sr_pkt = (c_packet_header *)malloc(len +
             sizeof(c_packet_header));
+	printf("2\n");
+	fflush(stdout);
     assert(sr_pkt);
+	printf("2\n");
+	fflush(stdout);
     sr_pkt->mLen  = htonl(total_len);
+	printf("2\n");
+	fflush(stdout);
     sr_pkt->mType = htonl(VNSPACKET);
+	printf("2\n");
+	fflush(stdout);
     strncpy(sr_pkt->mInterfaceName,iface,16);
+	printf("2\n");
+	fflush(stdout);
     memcpy(((uint8_t*)sr_pkt) + sizeof(c_packet_header),
             buf,len);
 printf("3\n");
@@ -600,15 +608,11 @@ printf("3\n");
         free ( sr_pkt );
         return -1;
     }
-printf("4\n");
-	fflush(stdout);
     if( write(sr->sockfd, sr_pkt, total_len) < total_len ){
         fprintf(stderr, "Error writing packet\n");
         free(sr_pkt);
         return -1;
     }
-printf("5\n");
-	fflush(stdout);
     free(sr_pkt);
 
     return 0;
