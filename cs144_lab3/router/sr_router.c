@@ -259,7 +259,7 @@ void sr_handlepacket(struct sr_instance* sr,
 		  retICMPhdr->icmp_sum = 0;
 		  retICMPhdr->icmp_sum = cksum(retICMPhdr, sizeof(sr_icmp_hdr_t));
 		  
-		  print_hdr_icmp(retICMPhdr, sizeof(sr_icmp_hdr_t));
+		  print_hdrs(reply, sizeof(sr_icmp_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_ethernet_hdr_t));
 		  
 		  return;
 	  }
