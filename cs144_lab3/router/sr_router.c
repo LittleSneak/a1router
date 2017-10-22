@@ -179,7 +179,6 @@ void sr_handlepacket(struct sr_instance* sr,
 		  }*/
 		  /*Handle echo requests*/
 		  if(icmp_hdr->icmp_type == 8 && found == 1){
-			  /* In cache, send packet */
 		      uint8_t *reply = malloc(len);
 			  memcpy(reply, packet, len);
 			  retEhdr = (sr_ethernet_hdr_t *)reply;
@@ -200,7 +199,7 @@ void sr_handlepacket(struct sr_instance* sr,
 			  retICMPhdr->icmp_type = 0;
 		      retICMPhdr->icmp_code = 0;
 			  retICMPhdr->icmp_sum = 0;
-			  retICMPhdr->icmp_sum = cksum(retICMPhdr, sizeof(sr_icmp_hdr_t));
+			  retICMPhdr->icmp_sum = cksum(retICMPhdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
 			  
 			  /*Find interface*/
 			  rt_walker = sr->routing_table;
@@ -225,6 +224,7 @@ void sr_handlepacket(struct sr_instance* sr,
 		      }
 			  else{
 				  /*Send the echo reply*/
+				  memcpy(retEhdr->ether_dhost, arpentry->mac, sizeof(retEhdr->ether_shost));
 			      sr_send_packet(sr /* borrowed */,
                          reply /* borrowed */ ,
                          len,
