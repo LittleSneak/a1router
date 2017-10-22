@@ -596,6 +596,8 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
                        sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t),
                        rt_walker->interface);*/
 		print_hdrs(packet, len);
+		printf("here\n");
+		fflush(stdout);
 		print_hdrs(reply, len);
 		free(reply);
 		return;
