@@ -280,7 +280,6 @@ void sr_handlepacket(struct sr_instance* sr,
   
   /*Handle ARP packet*/
   if(type == 2){
-	  print_hdrs(packet, len);
 	  /*Obtain ARP header*/
 	  arp_hdr = (sr_arp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Handle arp request*/
