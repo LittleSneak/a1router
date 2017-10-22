@@ -157,6 +157,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	  }
 	  /*Check if packet is meant for the router*/
 	  int found = 0;
+	  if_walker = sr->if_list;
 	  while (if_walker){
 		  print_addr_ip_int(if_walker->ip);
 		  printf("\n");
