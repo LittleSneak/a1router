@@ -244,7 +244,6 @@ void sr_handlepacket(struct sr_instance* sr,
 	  if(rt_walker != NULL){
 		  /*Check arp cache*/
 		  arpentry = sr_arpcache_lookup(&(sr->cache), rt_walker->dest.s_addr);
-		  printf("entry1\n");
 		  if(arpentry != NULL){
 			  memcpy(ehdr->ether_dhost, arpentry->mac, sizeof(uint8_t) * 6);
 			  sr_send_packet(sr, packet, len, rt_walker->interface);
@@ -253,14 +252,13 @@ void sr_handlepacket(struct sr_instance* sr,
 		  }
 		  /*Not in cache, send ARP requests*/
 		  else{
-			  printf("entry2\n");
+			  printf("%s\n", rt_walker->interface);
 			  sr_arpcache_queuereq(&(sr->cache),
                                        rt_walker->dest.s_addr,
                                        packet,
                                        len,
                                        rt_walker->interface);
 		  }
-		  printf("entry3\n");
 		  return;
 	  }
 	  else{
