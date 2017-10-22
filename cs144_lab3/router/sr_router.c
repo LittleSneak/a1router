@@ -142,7 +142,6 @@ void sr_handlepacket(struct sr_instance* sr,
   /*Handle IP packet or an ICMP packet*/
   printf("here1\n");
   if(type == 0 || type == 1){
-	  printf("here2\n");
 	  /*Obtain ip header*/
 	  iphdr = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Check the checksum*/
@@ -159,21 +158,15 @@ void sr_handlepacket(struct sr_instance* sr,
 	  int found = 0;
 	  if_walker = sr->if_list;
 	  while (if_walker){
-		  print_addr_ip_int(if_walker->ip);
-		  printf("\n");
-		  print_addr_ip_int(iphdr->ip_dst);
-		  printf("\n\n\n");
 		  if(if_walker->ip == iphdr->ip_dst){
 			  found = 1;
 	      }
 		  if_walker = if_walker->next;
 	  }
-	  printf("here2.5\n");
 	  /*Check if the message is an echo request*/
 	  if(type == 1 && found == 1){
-		  printf("here3\n");
 		  icmp_hdr = (sr_icmp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
-		  sum = icmp_hdr->icmp_sum;
+		  /*sum = icmp_hdr->icmp_sum;
 		  icmp_hdr->icmp_sum = 0;
 		  if(cksum(icmp_hdr, sizeof(sr_icmp_hdr_t)) != sum){
 			  printf("Checksum failed\n");
@@ -181,7 +174,7 @@ void sr_handlepacket(struct sr_instance* sr,
 		  }
 		  else{
 			  icmp_hdr->icmp_sum = sum;
-		  }
+		  }*/
 		  /*Handle echo requests*/
 		  if(icmp_hdr->icmp_type == 8 && found == 1){
 			  uint8_t *reply = malloc(len);
