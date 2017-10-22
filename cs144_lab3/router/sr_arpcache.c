@@ -18,13 +18,23 @@
 */
 void sr_arpcache_sweepreqs(struct sr_instance *sr) { 
     /* Fill this in */
+	printf("e0\n");
+	fflush(stdout);
 	struct sr_arpreq *req_walker = sr->cache.requests;
 	struct sr_arpreq *req_walker_next = NULL;
+	printf("e1\n");
+	fflush(stdout);
 	while(req_walker){
+		printf("e2\n");
+	    fflush(stdout);
 		req_walker_next = req_walker->next;
 		handle_arpreq(sr, req_walker);
 		req_walker = req_walker_next;
+		printf("e2.5\n");
+	    fflush(stdout);
 	}
+	printf("e3\n");
+	fflush(stdout);
 }
 
 /* Function for sending an ARP request for a given request
