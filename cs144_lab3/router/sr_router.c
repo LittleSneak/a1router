@@ -246,6 +246,14 @@ void sr_handlepacket(struct sr_instance* sr,
 		  arpentry = sr_arpcache_lookup(&(sr->cache), rt_walker->dest.s_addr);
 		  if(arpentry != NULL){
 			  memcpy(ehdr->ether_dhost, arpentry->mac, sizeof(uint8_t) * 6);
+			  /* Find interface */
+			  if_walker = sr->if_list;
+			  while(if_walker){
+				  if(strcmp(if_walker->name, rt_walker->interface)){
+					  break;
+				  }
+			  }
+			  memcpy(ehdr->ether_dhost, if_walker->addr, sizeof(uint8_t) * 6);
 			  sr_send_packet(sr, packet, len, rt_walker->interface);
 			  free(arpentry);
 			  return;
