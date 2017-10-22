@@ -253,7 +253,7 @@ void sr_handlepacket(struct sr_instance* sr,
 					  break;
 				  }
 			  }
-			  memcpy(ehdr->ether_dhost, if_walker->addr, sizeof(uint8_t) * 6);
+			  memcpy(ehdr->ether_shost, if_walker->addr, sizeof(uint8_t) * 6);
 			  sr_send_packet(sr, packet, len, rt_walker->interface);
 			  free(arpentry);
 			  return;
