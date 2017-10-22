@@ -376,8 +376,8 @@ void sr_handlepacket(struct sr_instance* sr,
 				  ehdr = (sr_ethernet_hdr_t *) req_walker->buf;
 				  memcpy(ehdr->ether_dhost, arp_hdr->ar_sha, sizeof(ehdr->ether_dhost));
 				  memcpy(ehdr->ether_shost, if_walker->addr, sizeof(ehdr->ether_dhost));
-				  printf("Destination: \n");
-				  print_addr_eth(ehdr->ether_dhost);
+				  printf("IF: %s, Source: \n", req_walker->iface);
+				  print_addr_eth(ehdr->ether_shost);
 				  fflush(stdout);
 				  /**print_hdrs(req_walker->buf, req_walker->len);**/
 				  fflush(stdout);
