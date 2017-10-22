@@ -233,7 +233,7 @@ void sr_handlepacket(struct sr_instance* sr,
 		  }
 	  }
 	  /*Packet is meant for router and is not an ICMP*/
-	  else if (found == 1){
+	  else if (iphdr->ip_p == 6 || iphdr->ip_p == 17){
 		  printf("Not for this router\n");
 		  send_icmp_type_3(3, len, packet, sr);
 		  return;
