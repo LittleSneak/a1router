@@ -166,6 +166,8 @@ void sr_handlepacket(struct sr_instance* sr,
 	  /*Check if the message is an echo request*/
 	  if(type == 1 && found == 1){
 		  icmp_hdr = (sr_icmp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
+		  
+		  /* Checksum is not working...
 		  sum = icmp_hdr->icmp_sum;
 		  printf("%u %u\n", sum, cksum(icmp_hdr, sizeof(sr_icmp_hdr_t) + 8));
 		  if(cksum(icmp_hdr, sizeof(sr_icmp_hdr_t)) != sum){
@@ -174,7 +176,7 @@ void sr_handlepacket(struct sr_instance* sr,
 		  }
 		  else{
 			  icmp_hdr->icmp_sum = sum;
-		  }
+		  }*/
 		  /*Handle echo requests*/
 		  if(icmp_hdr->icmp_type == 8 && found == 1){
 			  uint8_t *reply = malloc(len);
