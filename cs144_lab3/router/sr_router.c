@@ -78,6 +78,7 @@ void sr_handlepacket(struct sr_instance* sr,
   assert(interface);
 
   printf("*** -> Received packet of length %d \n",len);
+  print_hdrs(packet, len);
   /* fill in code here */
   /*Perform minimum packet length checks*/
   /*and identify packet type*/
@@ -223,8 +224,26 @@ void sr_handlepacket(struct sr_instance* sr,
 	  }
 	  
 	  iphdr->ip_ttl = iphdr->ip_ttl - 1;
+	  /* Send an ICMP time out back */
 	  if(iphdr->ip_ttl == 0){
 		  /*Return ICMP time out*/
+		  reply = malloc(sizeof(sr_icmp_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_ethernet_hdr_t));
+		  retEhdr = (sr_ethernet_hdr_t *) reply;
+		  retIPhdr = (sr_ip_hdr_t *) (reply + sizeof(sr_ethernet_hdr_t));
+		  retICMPhdr = (sr_icmp_hdr_t *) (reply + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
+		  
+		  /* Set up the ethernet header */
+		  memcpy(retEhdr->ether_dhost, ehdr->ether_shost, sizeof(uint8_t) * 6);
+		  memcpy(retEhdr->ether_shost, ehdr->ether_dhost, sizeof(uint8_t) * 6);
+		  retEhdr->ether_type = ehdr->ether_type;
+		  
+		  /* Set up the IP header */
+		  memcpy(retIPhdr, iphdr, sizeof(sr_ip_hdr_t));
+		  retIPhdr->ip_ttl = 64;
+		  retIPhdr->ip_sum = 0;
+		  retIPhdr->ip_dst = iphdr->ip_src;
+		  
+		  
 		  return;
 	  }
 	  
@@ -399,3 +418,135 @@ void sr_handlepacket(struct sr_instance* sr,
 
 }/* end sr_ForwardPacket */
 
+/* Sends a type 3 ICMP error  with a given code*/
+void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, int arp, struct sr_instance *sr){
+	
+	struct sr_rt* rt_walker = NULL;
+	struct sr_if* if_walker = NULL;
+	uint8_t *reply = malloc(sizeof(sr_ethernet_hdr_t) 
+	    + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t));
+		
+	/* Headers for the ICMP packet */
+    sr_ethernet_hdr_t *retEhdr = (sr_ethernet_hdr_t *) reply;
+    sr_ip_hdr_t *retIPhdr = (sr_ip_hdr_t *) (reply + sizeof(sr_ethernet_hdr_t));
+    sr_icmp_t3_hdr_t *retICMPhdr = (sr_icmp_t3_hdr_t *) 
+	    (reply + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
+		
+	/* Headers for the packet that was being processed */
+	sr_ethernet_hdr_t *ehdr = (sr_ethernet_hdr_t *) packet;
+	sr_ip_hdr_t *iphdr = (sr_ip_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t));
+	
+	/* Set ethernet header */
+	memcpy(retEhdr->ether_dhost, ehdr->ether_dhost, sizeof(uint8_t) * 6);
+	memcpy(retEhdr->ether_shost, ehdr->ether_shost, sizeof(uint8_t) * 6);
+	retEhdr->ether_type = ehdr->ether_type;
+	
+	/* The packet was an ARP packet */
+	if(arp == 0){
+		sr_icmp_hdr_t *icmphdr = (sr_icmp_hdr_t *) (packet + 
+	        sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
+			
+		/* Set up IP header */
+		memcpy(retIPhdr, iphdr, sizeof(sr_ip_hdr_t));
+		retIPhdr->ip_p = htons(ip_protocol_icmp);
+		retIPhdr->ip_src = iphdr->ip_dst;
+		retIPhdr->ip_dst = iphdr->ip_src;
+		retIPhdr->ip_sum = 0;
+		retIPhdr->ip_ttl = 64;
+		retIPhdr->ip_sum = cksum(retIPhdr, sizeof(sr_ip_hdr_t));
+		
+		/* Set up the ICMP header */
+		retICMPhdr->icmp_type = 3;
+		retICMPhdr->icmp_code = code;
+		retICMPhdr->icmp_sum = 0;
+		/* Decide how many bytes to read into the data array */
+		unsigned int size_of_data = len - sizeof(sr_ethernet_hdr_t) - 
+		    sizeof(sr_ip_hdr_t) - sizeof(sr_icmp_hdr_t);
+		unsigned int bytes_to_read = 0;
+		if(size_of_data - ICMP_DATA_SIZE < 0){
+			bytes_to_read = size_of_data;
+		}
+		else{
+			bytes_to_read = ICMP_DATA_SIZE;
+		}
+		memcpy(retICMPhdr->data, icmphdr + sizeof(sr_icmp_hdr_t), bytes_to_read);
+		
+		/* Find interface */
+		rt_walker = sr->routing_table;
+		while(rt_walker){
+			if(rt_walker->dest.s_addr == retIPhdr->ip_dst){
+				break;
+			}
+			rt_walker = rt_walker->next;
+		}
+		
+		sr_send_packet(sr /* borrowed */,
+                       reply /* borrowed */ ,
+                       sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t),
+                       rt_walker->interface /* borrowed */);
+		free(reply);
+		return;
+	}
+	
+	/* The original packet was an ARP packet */
+	else{
+		sr_arp_hdr_t *arphdr = (sr_arp_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t));
+			
+		/* Set up IP header */
+		retIPhdr->ip_hl = 4;
+		retIPhdr->ip_v = 4;
+		retIPhdr->ip_tos = 0;
+		retIPhdr->ip_len = sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t);
+		retIPhdr->ip_id = 0;
+		retIPhdr->ip_off = 0;
+		retIPhdr->ip_ttl = 64;
+		retIPhdr->ip_p = htons(ip_protocol_icmp);
+		retIPhdr->ip_dst = arphdr->ar_sip;
+		retIPhdr->ip_sum = 0;
+		retIPhdr->ip_ttl = 64;
+		
+		
+		/* Set up the ICMP header */
+		retICMPhdr->icmp_type = 3;
+		retICMPhdr->icmp_code = code;
+		retICMPhdr->icmp_sum = 0;
+		/* Decide how many bytes to read into the data array */
+		unsigned int size_of_data = len - sizeof(sr_ethernet_hdr_t) - 
+		    sizeof(sr_arp_hdr_t);
+		unsigned int bytes_to_read = 0;
+		if(size_of_data - ICMP_DATA_SIZE < 0){
+			bytes_to_read = size_of_data;
+		}
+		else{
+			bytes_to_read = ICMP_DATA_SIZE;
+		}
+		memcpy(retICMPhdr->data, arphdr + sizeof(sr_arp_hdr_t), bytes_to_read);
+		
+		/* Find interface */
+		rt_walker = sr->routing_table;
+		while(rt_walker){
+			if(rt_walker->dest.s_addr == retIPhdr->ip_dst){
+				break;
+			}
+			rt_walker = rt_walker->next;
+		}
+		/* Find the IP address of the interface */
+		if_walker = sr->if_list;
+		while(if_walker){
+			if(strcmp(rt_walker->interface, if_walker->name) == 0){
+				break;
+			}
+			if_walker = if_walker->next;
+		}
+		retIPhdr->ip_src = if_walker->ip;
+		retIPhdr->ip_sum = cksum(retIPhdr, sizeof(sr_ip_hdr_t));
+		
+		sr_send_packet(sr /* borrowed */,
+                       reply /* borrowed */ ,
+                       sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t),
+                       rt_walker->interface /* borrowed */);
+		free(reply);
+		return;
+	}
+	
+}
