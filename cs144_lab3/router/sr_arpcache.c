@@ -18,6 +18,91 @@
 */
 void sr_arpcache_sweepreqs(struct sr_instance *sr) { 
     /* Fill this in */
+	struct sr_arpreq * req_walker = sr->cache.requests;
+	while(req_walker){
+		handle_arpreq(sr, req_walker);
+		req_walker = req_walker->next;
+	}
+}
+
+/* Function for sending an ARP request for a given request
+ */
+void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
+	time_t now;
+	time(&now);
+	
+	/*Packet that will be sent*/
+	uint8_t *reply = NULL;
+	sr_ethernet_hdr_t *retEhdr = NULL;
+	/*
+	sr_ip_hdr_t *retIPhdr = NULL;
+    sr_icmp_hdr_t *retICMPhdr = NULL;
+	*/
+    sr_arp_hdr_t *retARPhdr = NULL;
+	struct sr_if* if_walker = NULL;
+	
+	
+	/* Check if it's been at least 1 second since last request */
+	if(difftime(now, request->sent) > 1){
+		if(request->times_sent >= 5){
+			/*Send ICMP unreachable*/
+		}
+		/* Send a request */
+		else{
+			/*Initialize the packet and headers*/
+			reply = malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
+			retEhdr = (sr_ethernet_hdr_t *) reply;
+			retARPhdr = (sr_arp_hdr_t *) (reply + sizeof(sr_ethernet_hdr_t));
+			
+			/* Find the interface for source mac and ip */
+			if_walker = sr->if_list;
+			while(if_walker){
+				if(strcmp(if_walker->name, request->packets->iface) == 0){
+					break;
+				}
+			}
+			if(if_walker == NULL){
+				printf("interface not found\n");
+				return;
+			}
+			
+			/* Set up ethernet header */
+			retEhdr->ether_type = htons(ethertype_arp);
+			memcpy(retEhdr->ether_shost, if_walker->addr, sizeof(uint8_t) * 6);
+			/*Set destination to FF-FF-FF-FF-FF-FF*/
+			retEhdr->ether_dhost[0] = 255;
+			retEhdr->ether_dhost[1] = 255;
+			retEhdr->ether_dhost[2] = 255;
+			retEhdr->ether_dhost[3] = 255;
+			retEhdr->ether_dhost[4] = 255;
+			retEhdr->ether_dhost[5] = 255;
+			
+			/*Set up ARP header*/
+			retARPhdr->ar_hrd = htons(arp_hrd_ethernet);
+			retARPhdr->ar_pro = htons(0x0800);
+			retARPhdr->ar_hln = ETHER_ADDR_LEN;
+			retARPhdr->ar_pln = 4;
+			retARPhdr->ar_op = htons(arp_op_request);
+			memcpy(retARPhdr->ar_sha, if_walker->addr, sizeof(unsigned char) * 6);
+			retARPhdr->ar_sip = if_walker->ip;
+			retARPhdr->ar_tha[0] = 0;
+			retARPhdr->ar_tha[1] = 0;
+			retARPhdr->ar_tha[2] = 0;
+			retARPhdr->ar_tha[3] = 0;
+			retARPhdr->ar_tha[4] = 0;
+			retARPhdr->ar_tha[5] = 0;
+			retARPhdr->ar_tip = request->ip;
+			
+			/* Send the packet */
+			sr_send_packet(sr, reply, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t), if_walker->name);
+			
+			/* Update information in request */
+			time(&now);
+			request->sent = now;
+			request->times_sent = request->times_sent + 1;
+			free(reply);
+		}
+	}
 }
 
 /* You should not need to touch the rest of this code. */

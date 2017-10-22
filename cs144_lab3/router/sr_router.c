@@ -251,18 +251,14 @@ void sr_handlepacket(struct sr_instance* sr,
 		  if(rt_walker->dest.s_addr == iphdr->ip_dst){
 			  break;
 		  }
+		  rt_walker = rt_walker->next;
 	  }
 	  /*Found a destination*/
 	  if(!rt_walker){
 		  /*Check arp cache*/
 		  arpentry = sr_arpcache_lookup(&(sr->cache), rt_walker->dest.s_addr);
 		  if(arpentry != NULL){
-			  ehdr->ether_dhost[0] = arpentry->mac[0];
-			  ehdr->ether_dhost[1] = arpentry->mac[1];
-			  ehdr->ether_dhost[2] = arpentry->mac[2];
-			  ehdr->ether_dhost[3] = arpentry->mac[3];
-			  ehdr->ether_dhost[4] = arpentry->mac[4];
-			  ehdr->ether_dhost[5] = arpentry->mac[5];
+			  memcpy(ehdr->ether_dhost, arpentry->mac, sizeof(uint8_t) * 6);
 			  sr_send_packet(sr, packet, len, rt_walker->interface);
 			  free(arpentry);
 			  return;
@@ -329,6 +325,7 @@ void sr_handlepacket(struct sr_instance* sr,
                          reply /* borrowed */ ,
                          sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t),
                          rt_walker->interface);
+			  free(reply);
 			  return;
 		  }
 		  
@@ -346,12 +343,7 @@ void sr_handlepacket(struct sr_instance* sr,
 		          arpentry = sr_arpcache_lookup(&(sr->cache), rt_walker->dest.s_addr);
 				  /*In cache, send the packet*/
 		          if(arpentry != NULL){
-			          ehdr->ether_dhost[0] = arpentry->mac[0];
-			          ehdr->ether_dhost[1] = arpentry->mac[1];
-			          ehdr->ether_dhost[2] = arpentry->mac[2];
-		    	      ehdr->ether_dhost[3] = arpentry->mac[3];
-			          ehdr->ether_dhost[4] = arpentry->mac[4];
-			          ehdr->ether_dhost[5] = arpentry->mac[5];
+					  memcpy(ehdr->ether_dhost, arpentry->mac, sizeof(uint8_t) * 6);
 			          sr_send_packet(sr, packet, len, rt_walker->interface);
 			          free(arpentry);
 			          return;
