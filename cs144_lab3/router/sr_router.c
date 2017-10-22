@@ -156,9 +156,9 @@ void sr_handlepacket(struct sr_instance* sr,
 	  /*Check if packet is meant for the router*/
 	  int found = 0;
 	  if_walker = sr->if_list;
+	  print_hdrs(packet, len);
 	  while (if_walker){
 		  if(if_walker->ip == iphdr->ip_dst){
-			  print_hdrs(packet, len);
 			  found = 1;
 			  break;
 	      }
