@@ -235,18 +235,14 @@ void sr_handlepacket(struct sr_instance* sr,
 	  /*Find the longest prefix match*/
 	  rt_walker = sr->routing_table;
 	  while(rt_walker){
-		  print_addr_ip_int(iphdr->ip_dst);
-		  printf("\n");
-		  print_addr_ip_int(rt_walker->dest.s_addr);
-		  printf("\n");
-		  printf("\n");
 		  if(rt_walker->dest.s_addr == iphdr->ip_dst){
 			  break;
 		  }
 		  rt_walker = rt_walker->next;
 	  }
 	  /*Found a destination*/
-	  if(!rt_walker){
+	  if(rt_walker != NULL){
+		  printf("FOUND INTERFACE\n");
 		  /*Check arp cache*/
 		  arpentry = sr_arpcache_lookup(&(sr->cache), rt_walker->dest.s_addr);
 		  if(arpentry != NULL){
