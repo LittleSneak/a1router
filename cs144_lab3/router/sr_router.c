@@ -144,8 +144,8 @@ void sr_handlepacket(struct sr_instance* sr,
 	  /*Obtain ip header*/
 	  iphdr = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Check the checksum*/
-	  printf("%u\n", cksum(iphdr, sizeof(sr_ip_hdr_t) * 8));
-	  if(cksum(iphdr, sizeof(sr_ip_hdr_t) * 8) != 0){
+	  printf("%u\n", cksum(packet + sizeof(sr_ethernet_hdr_t), sizeof(sr_ip_hdr_t)));
+	  if(cksum(packet + sizeof(sr_ethernet_hdr_t), sizeof(sr_ip_hdr_t)) != 0){
 		  printf("Checksum failed\n");
 		  return;
 	  }
