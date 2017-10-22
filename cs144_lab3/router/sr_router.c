@@ -158,6 +158,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	  if_walker = sr->if_list;
 	  while (if_walker){
 		  if(if_walker->ip == iphdr->ip_dst){
+			  printf("found");
 			  found = 1;
 	      }
 		  if_walker = if_walker->next;
