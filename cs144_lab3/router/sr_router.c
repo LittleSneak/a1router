@@ -386,7 +386,7 @@ void sr_handlepacket(struct sr_instance* sr,
 				  memcpy(ehdr->ether_dhost, arp_hdr->ar_sha, sizeof(ehdr->ether_dhost));
 				  printf("before sending\n");
 			      fflush(stdout);
-				  sleep(0.1);
+				  usleep(100);
 				  printf("SENDING NOW\n");
 			      fflush(stdout);
 				  sr_send_packet(sr /* borrowed */,
