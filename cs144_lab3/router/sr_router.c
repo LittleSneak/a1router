@@ -243,18 +243,20 @@ void sr_handlepacket(struct sr_instance* sr,
 	  /*Found a destination*/
 	  if(rt_walker != NULL){
 		  /*Check arp cache*/
-		  printf("In cache\n");
-		  fflush(stdout);
 		  arpentry = sr_arpcache_lookup(&(sr->cache), rt_walker->dest.s_addr);
 		  if(arpentry != NULL){
 			  memcpy(ehdr->ether_dhost, arpentry->mac, sizeof(uint8_t) * 6);
 			  /* Find interface */
 			  if_walker = sr->if_list;
 			  while(if_walker){
-				  if(strcmp(if_walker->name, rt_walker->interface)){
+				  if(strcmp(if_walker->name, rt_walker->interface) == 0){
 					  break;
 				  }
+				  if_walker = if_walker->next;
 			  }
+			  printf("IF: %s, Source: \n", req_walker->iface);
+			  print_addr_eth(ehdr->ether_shost);
+			  fflush(stdout);
 			  memcpy(ehdr->ether_shost, if_walker->addr, sizeof(uint8_t) * 6);
 			  sr_send_packet(sr, packet, len, rt_walker->interface);
 			  free(arpentry);
@@ -386,11 +388,6 @@ void sr_handlepacket(struct sr_instance* sr,
 				  ehdr = (sr_ethernet_hdr_t *) req_walker->buf;
 				  memcpy(ehdr->ether_dhost, arp_hdr->ar_sha, sizeof(ehdr->ether_dhost));
 				  memcpy(ehdr->ether_shost, if_walker->addr, sizeof(ehdr->ether_dhost));
-				  printf("IF: %s, Source: \n", req_walker->iface);
-				  print_addr_eth(ehdr->ether_shost);
-				  fflush(stdout);
-				  /**print_hdrs(req_walker->buf, req_walker->len);**/
-				  fflush(stdout);
 				  sr_send_packet(sr /* borrowed */,
                          req_walker->buf /* borrowed */ ,
                          req_walker->len,
