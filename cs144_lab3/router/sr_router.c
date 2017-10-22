@@ -391,7 +391,11 @@ void sr_handlepacket(struct sr_instance* sr,
 				  req_walker = req_walker->next;
 			  }
 			  /*Free all requests related to this reply*/
+			  printf("done\n");
+			  fflush(stdout);
 			  sr_arpreq_destroy(&(sr->cache), requests);
+			  printf("done\n");
+			  fflush(stdout);
 		  }
 	  }
   }
