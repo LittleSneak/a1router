@@ -98,7 +98,6 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
 			
 			/* Send the packet */
 			sr_send_packet(sr, reply, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t), if_walker->name);
-			print_hdrs(reply, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
 			/* Update information in request */
 			time(&now);
 			request->sent = now;
