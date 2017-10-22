@@ -140,7 +140,9 @@ void sr_handlepacket(struct sr_instance* sr,
   }
   
   /*Handle IP packet or an ICMP packet*/
+  printf("here1\n");
   if(type == 0 || type == 1){
+	  printf("here2\n");
 	  /*Obtain ip header*/
 	  iphdr = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Check the checksum*/
@@ -162,6 +164,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	  }
 	  /*Check if the message is an echo request*/
 	  if(type == 1 && found == 1){
+		  printf("here3\n");
 		  icmp_hdr = (sr_icmp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
 		  sum = icmp_hdr->icmp_sum;
 		  icmp_hdr->icmp_sum = 0;
