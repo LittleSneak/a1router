@@ -366,18 +366,6 @@ void sr_handlepacket(struct sr_instance* sr,
 			  }
 			  if_walker = if_walker->next;
 		  }
-		  /*Find the interface for this IP address*/
-		  rt_walker = sr->routing_table;
-	      while(rt_walker){
-			  print_addr_ip_int(rt_walker->dest.s_addr);
-			  printf("\n");
-			  print_addr_ip_int(arp_hdr->ar_tip);
-			  printf("\n");
-		      if(rt_walker->dest.s_addr == arp_hdr->ar_tip){
-			      break;
-		      }
-		      rt_walker = rt_walker->next;
-	      }
 		  /*Reply is for this router, cache the reply*/
 		  if(located == 1){
 			  struct sr_arpreq *requests =  sr_arpcache_insert(&(sr->cache),
@@ -390,12 +378,10 @@ void sr_handlepacket(struct sr_instance* sr,
 				  memcpy(ehdr->ether_dhost, arp_hdr->ar_sha, sizeof(ehdr->ether_dhost));
 				  print_hdrs(req_walker->buf, req_walker->len);
 				  fflush(stdout);
-				  printf("%s\n", rt_walker->interface);
-				  fflush(stdout);
 				  sr_send_packet(sr /* borrowed */,
                          req_walker->buf /* borrowed */ ,
                          req_walker->len,
-                         rt_walker->interface /* borrowed */);
+                         req_walker->iface /* borrowed */);
 				  req_walker = req_walker->next;
 			  }
 			  /*Free all requests related to this reply*/
