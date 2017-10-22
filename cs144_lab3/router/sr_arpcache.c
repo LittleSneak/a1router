@@ -47,10 +47,13 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
 	if(difftime(now, request->sent) > 1){
 		if(request->times_sent >= 5){
 			/*Send ICMP unreachable*/
+			return;
 		}
 		/* Send a request */
 		else{
 			/*Initialize the packet and headers*/
+			printf("here1");
+			fflush(stdout);
 			reply = malloc(sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
 			retEhdr = (sr_ethernet_hdr_t *) reply;
 			retARPhdr = (sr_arp_hdr_t *) (reply + sizeof(sr_ethernet_hdr_t));
@@ -78,7 +81,8 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
 			retEhdr->ether_dhost[3] = 255;
 			retEhdr->ether_dhost[4] = 255;
 			retEhdr->ether_dhost[5] = 255;
-			
+			printf("here2");
+			fflush(stdout);
 			/*Set up ARP header*/
 			retARPhdr->ar_hrd = htons(arp_hrd_ethernet);
 			retARPhdr->ar_pro = htons(0x0800);
@@ -100,11 +104,14 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
 			print_hdrs(reply, sizeof(sr_ethernet_hdr_t) + sizeof(sr_arp_hdr_t));
 			/* Update information in request */
 			time(&now);
+			printf("here3");
+			fflush(stdout);
 			request->sent = now;
 			request->times_sent = request->times_sent + 1;
 			free(reply);
 		}
 	}
+	return;
 }
 
 /* You should not need to touch the rest of this code. */
