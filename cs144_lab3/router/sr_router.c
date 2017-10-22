@@ -484,7 +484,7 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 	/* Set ethernet header */
 	memcpy(retEhdr->ether_dhost, ehdr->ether_shost, sizeof(uint8_t) * 6);
 	memcpy(retEhdr->ether_shost, ehdr->ether_dhost, sizeof(uint8_t) * 6);
-	retEhdr->ether_type = ehdr->ether_type;
+	retEhdr->ether_type = htons(ethertype_ip);
 	
 	/* Check if it is an arp packet */
 	if(ethertype(packet) == ethertype_ip){
