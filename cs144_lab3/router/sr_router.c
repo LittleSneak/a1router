@@ -232,10 +232,14 @@ void sr_handlepacket(struct sr_instance* sr,
 	  iphdr->ip_sum = 0;
 	  iphdr->ip_sum = cksum(iphdr, sizeof(sr_ip_hdr_t));
 	  
-	  printf("Handling type %d\n", type);
 	  /*Find the longest prefix match*/
 	  rt_walker = sr->routing_table;
 	  while(rt_walker){
+		  print_addr_ip_int(iphdr->ip_dst);
+		  printf("\n");
+		  print_addr_ip_int(rt_walker->dest.s_addr);
+		  printf("\n");
+		  printf("\n");
 		  if(rt_walker->dest.s_addr == iphdr->ip_dst){
 			  break;
 		  }
@@ -243,7 +247,6 @@ void sr_handlepacket(struct sr_instance* sr,
 	  }
 	  /*Found a destination*/
 	  if(!rt_walker){
-		  printf("Handling type %d\n", type);
 		  /*Check arp cache*/
 		  arpentry = sr_arpcache_lookup(&(sr->cache), rt_walker->dest.s_addr);
 		  if(arpentry != NULL){
