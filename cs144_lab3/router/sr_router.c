@@ -78,6 +78,8 @@ void sr_handlepacket(struct sr_instance* sr,
   assert(interface);
 
   printf("*** -> Received packet of length %d \n",len);
+  print_hdrs(packet, len);
+  fflush(stdout);
   /* fill in code here */
   /*Perform minimum packet length checks*/
   /*and identify packet type*/
