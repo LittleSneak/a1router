@@ -377,7 +377,12 @@ void sr_handlepacket(struct sr_instance* sr,
 				  ehdr = (sr_ethernet_hdr_t *) req_walker->buf;
 				  memcpy(ehdr->ether_dhost, arp_hdr->ar_sha, sizeof(ehdr->ether_dhost));
 				  memcpy(ehdr->ether_shost, if_walker->addr, sizeof(ehdr->ether_dhost));
-				  print_hdrs(req_walker->buf, req_walker->len);
+				  printf("Destination: ");
+				  print_addr_eth(ehdr->ether_dhost);
+				  printf("\nSource: ");
+				  print_addr_eth(ehdr->ether_shost);
+				  printf("\n%s \n", req_walker->iface);
+				  /**print_hdrs(req_walker->buf, req_walker->len);**/
 				  fflush(stdout);
 				  sr_send_packet(sr /* borrowed */,
                          req_walker->buf /* borrowed */ ,
