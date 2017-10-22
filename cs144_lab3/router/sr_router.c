@@ -482,8 +482,8 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 	sr_ip_hdr_t *iphdr = (sr_ip_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t));
 	
 	/* Set ethernet header */
-	memcpy(retEhdr->ether_dhost, ehdr->ether_dhost, sizeof(uint8_t) * 6);
-	memcpy(retEhdr->ether_shost, ehdr->ether_shost, sizeof(uint8_t) * 6);
+	memcpy(retEhdr->ether_dhost, ehdr->ether_shost, sizeof(uint8_t) * 6);
+	memcpy(retEhdr->ether_shost, ehdr->ether_dhost, sizeof(uint8_t) * 6);
 	retEhdr->ether_type = ehdr->ether_type;
 	
 	/* Check if it is an arp packet */
@@ -545,8 +545,6 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		sr_arp_hdr_t *arphdr = (sr_arp_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t));
 			
 		/* Set up IP header */
-		retIPhdr->ip_hl = 4;
-		retIPhdr->ip_v = 4;
 		retIPhdr->ip_tos = 0;
 		retIPhdr->ip_len = sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t);
 		retIPhdr->ip_id = 0;
@@ -597,8 +595,8 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
                        reply,
                        sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t),
                        rt_walker->interface);*/
-		/*print_hdrs(packet, len);
-		print_hdrs(reply, len);*/
+		print_hdrs(packet, len);
+		print_hdrs(reply, len);
 		free(reply);
 		return;
 	}
