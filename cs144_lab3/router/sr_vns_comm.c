@@ -592,7 +592,7 @@ int sr_send_packet(struct sr_instance* sr /* borrowed */,
 	fflush(stdout);
 	sleep(1.0);
 	printf("here4\n");
-	fflush(stdout)
+	fflush(stdout);
     strncpy(sr_pkt->mInterfaceName,iface,16);
     memcpy(((uint8_t*)sr_pkt) + sizeof(c_packet_header),
             buf,len);
