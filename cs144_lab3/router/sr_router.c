@@ -77,7 +77,7 @@ void sr_handlepacket(struct sr_instance* sr,
   assert(packet);
   assert(interface);
 
-  printf("*** -> Received packet of length %d \n",len);
+  /*printf("*** -> Received packet of length %d \n",len);*/
   /* fill in code here */
   /*Perform minimum packet length checks*/
   /*and identify packet type*/
@@ -264,6 +264,7 @@ void sr_handlepacket(struct sr_instance* sr,
                          reply /* borrowed */ ,
                          sizeof(sr_icmp_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_ethernet_hdr_t),
                          if_walker->name /* borrowed */);
+		  print_hdrs(reply, sizeof(sr_icmp_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_ethernet_hdr_t));
 		  free(reply);
 		  return;
 	  }
