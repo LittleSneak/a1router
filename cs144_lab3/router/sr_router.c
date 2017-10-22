@@ -384,14 +384,16 @@ void sr_handlepacket(struct sr_instance* sr,
 			  while(req_walker != NULL){
 				  printf("replied to\n");
 		          fflush(stdout);
-				  print_hdrs(req_walker->buf, req_walker->len);
-				  fflush(stdout);
 				  ehdr = (sr_ethernet_hdr_t *) req_walker->buf;
 				  memcpy(ehdr->ether_dhost, arp_hdr->ar_sha, sizeof(ehdr->ether_dhost));
+				  printf("replied to\n");
+		          fflush(stdout);
 				  sr_send_packet(sr /* borrowed */,
                          req_walker->buf /* borrowed */ ,
                          req_walker->len,
                          rt_walker->interface /* borrowed */);
+				  printf("replied to\n");
+		          fflush(stdout);
 				  req_walker = req_walker->next;
 			  }
 			  /*Free all requests related to this reply*/
