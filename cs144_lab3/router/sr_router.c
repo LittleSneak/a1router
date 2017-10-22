@@ -166,6 +166,7 @@ void sr_handlepacket(struct sr_instance* sr,
 		  sum = icmp_hdr->icmp_sum;
 		  icmp_hdr->icmp_sum = 0;
 		  if(cksum(icmp_hdr, sizeof(sr_icmp_hdr_t)) != sum){
+			  printf("Checksum failed\n");
 			  return;
 		  }
 		  else{
