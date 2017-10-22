@@ -220,7 +220,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	  /*Packet is meant for router and is not an ICMP*/
 	  else if (found == 1){
 		  print_hdrs(packet, len);
-		  send_icmp_type_3 (3, len, packet, 0, sr);
+		  send_icmp_type_3(3, len, packet, 0, sr);
 		  return;
 	  }
 	  
