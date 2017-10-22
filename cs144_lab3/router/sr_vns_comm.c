@@ -585,7 +585,7 @@ int sr_send_packet(struct sr_instance* sr /* borrowed */,
 	fflush(stdout);
     sr_pkt->mLen  = htonl(total_len);
     sr_pkt->mType = htonl(VNSPACKET);
-	printf("Here\n");
+	printf("Here %s\n", iface);
 	fflush(stdout);
 	print_hdrs(buf, len);
 	fflush(stdout);
