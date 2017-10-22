@@ -219,7 +219,9 @@ void sr_handlepacket(struct sr_instance* sr,
 	  }
 	  /*Packet is meant for router and is not an ICMP*/
 	  else if (found == 1){
-		  /*Return ICMP destination not reachable*/
+		  print_hdrs(packet, len);
+		  send_icmp_type_3 (3, len, packet, 0, sr);
+		  return;
 	  }
 	  
 	  iphdr->ip_ttl = iphdr->ip_ttl - 1;
@@ -265,7 +267,6 @@ void sr_handlepacket(struct sr_instance* sr,
                          reply /* borrowed */ ,
                          sizeof(sr_icmp_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_ethernet_hdr_t),
                          if_walker->name /* borrowed */);
-		  print_hdrs(reply, sizeof(sr_icmp_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_ethernet_hdr_t));
 		  free(reply);
 		  return;
 	  }
