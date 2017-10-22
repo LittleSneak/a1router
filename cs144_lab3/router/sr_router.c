@@ -542,7 +542,6 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 			rt_walker = rt_walker->next;
 		}
 		if(rt_walker == NULL){
-			printf("here\n");
 			return;
 		}
 		/* Find the source ip */
@@ -558,7 +557,8 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		retIPhdr->ip_src = if_walker->ip;
 		retIPhdr->ip_sum = cksum(retIPhdr, sizeof(sr_ip_hdr_t));
 		memcpy(retEhdr->ether_shost, if_walker->addr, sizeof(uint8_t) * 6);
-		
+		printf("PRINTING REPLY:\N");
+		print_hdrs(reply, len);
 		sr_send_packet(sr,
                        reply,
                        sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t),
