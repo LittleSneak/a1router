@@ -513,6 +513,7 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		retIPhdr->ip_dst = iphdr->ip_src;
 		retIPhdr->ip_sum = 0;
 		retIPhdr->ip_ttl = 64;
+		retIPhdr->ip_id = 0;
 		/* Set up the ICMP header */
 		retICMPhdr->icmp_type = 3;
 		retICMPhdr->icmp_code = code;
@@ -528,6 +529,8 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		else{
 			bytes_to_read = ICMP_DATA_SIZE - sizeof(sr_ip_hdr_t);
 		}
+		printf("Byted to read: %d\n", bytes_to_read);
+		fflush(stdout);
 		memcpy(retICMPhdr->data, iphdr, sizeof(sr_ip_hdr_t) + bytes_to_read);
 		
 		retICMPhdr->icmp_sum = cksum(retICMPhdr, sizeof(sr_icmp_t3_hdr_t));
