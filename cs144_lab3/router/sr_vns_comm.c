@@ -591,15 +591,9 @@ printf("2\n");
 	printf("2\n");
 	fflush(stdout);
     sr_pkt->mType = htonl(VNSPACKET);
-	printf("2 %s \n", iface);
-	fflush(stdout);
     strncpy(sr_pkt->mInterfaceName,iface,16);
-	printf("2\n");
-	fflush(stdout);
     memcpy(((uint8_t*)sr_pkt) + sizeof(c_packet_header),
             buf,len);
-printf("3\n");
-	fflush(stdout);
     /* -- log packet -- */
     sr_log_packet(sr,buf,len);
 
