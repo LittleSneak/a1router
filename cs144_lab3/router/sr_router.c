@@ -504,7 +504,6 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 	
 	/* The packet was not an ARP packet */
 	if(arp == 0){
-		print_hdrs(packet, len);
 		sr_ip_hdr_t *iphdr = (sr_ip_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t));
 		sr_icmp_hdr_t *icmphdr = (sr_icmp_hdr_t *) (packet + 
 	        sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
@@ -561,6 +560,7 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
                        reply,
                        sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t),
                        rt_walker->interface);
+		print_hdrs(reply, len);
 		free(reply);
 		return;
 	}
