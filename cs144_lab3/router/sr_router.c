@@ -141,7 +141,6 @@ void sr_handlepacket(struct sr_instance* sr,
   
   /*Handle IP packet or an ICMP packet*/
   if(type == 0 || type == 1){
-	  print_hdrs(packet, len);
 	  /*Obtain ip header*/
 	  iphdr = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Check the checksum*/
@@ -226,6 +225,7 @@ void sr_handlepacket(struct sr_instance* sr,
 	  iphdr->ip_ttl = iphdr->ip_ttl - 1;
 	  /* Send an ICMP time out back */
 	  if(iphdr->ip_ttl == 0){
+		  print_hdrs(packet, len);
 		  /*Return ICMP time out*/
 		  reply = malloc(sizeof(sr_icmp_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_ethernet_hdr_t));
 		  retEhdr = (sr_ethernet_hdr_t *) reply;
