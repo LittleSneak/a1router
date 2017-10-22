@@ -243,6 +243,8 @@ void sr_handlepacket(struct sr_instance* sr,
 	  /*Found a destination*/
 	  if(rt_walker != NULL){
 		  /*Check arp cache*/
+		  printf("In cache\n");
+		  fflush(stdout);
 		  arpentry = sr_arpcache_lookup(&(sr->cache), rt_walker->dest.s_addr);
 		  if(arpentry != NULL){
 			  memcpy(ehdr->ether_dhost, arpentry->mac, sizeof(uint8_t) * 6);
