@@ -245,7 +245,7 @@ void sr_handlepacket(struct sr_instance* sr,
 		  /* Find the interface to send to */
 		  if_walker = sr->if_list;
 		  while(if_walker){
-			  if(memcmp(if_walker->addr, ehdr->ether_dhost, sizeof(unsigned char) * 6)){
+			  if(memcmp(if_walker->addr, ehdr->ether_dhost, sizeof(unsigned char) * 6) == 0){
 				  break;
 			  }
 			  if_walker = if_walker->next;
