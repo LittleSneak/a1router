@@ -141,9 +141,9 @@ void sr_handlepacket(struct sr_instance* sr,
   
   /*Handle IP packet or an ICMP packet*/
   if(type == 0 || type == 1){
-	  print_addr_ip_int(iphdr->ip_dst);
 	  /*Obtain ip header*/
 	  iphdr = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
+	  print_addr_ip_int(iphdr->ip_dst);
 	  /*Check the checksum*/
 	  uint16_t sum = iphdr->ip_sum;
 	  iphdr->ip_sum = 0;
