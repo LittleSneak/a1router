@@ -587,7 +587,11 @@ int sr_send_packet(struct sr_instance* sr /* borrowed */,
     sr_pkt->mType = htonl(VNSPACKET);
 	printf("Here\n");
 	fflush(stdout);
+	print_hdrs(buf, len);
+	fflush(stdout);
     strncpy(sr_pkt->mInterfaceName,iface,16);
+	printf("Here2\n");
+	fflush(stdout);
     memcpy(((uint8_t*)sr_pkt) + sizeof(c_packet_header),
             buf,len);
     /* -- log packet -- */
