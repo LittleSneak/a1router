@@ -575,7 +575,7 @@ int sr_send_packet(struct sr_instance* sr /* borrowed */,
 	printf("here1\n");
 	fflush(stdout);
 	sleep(1.0);
-	printf("here1\n");
+	printf("here2\n");
 	fflush(stdout);
     /* don't waste my time ... */
     if ( len < sizeof(struct sr_ethernet_hdr) ){
