@@ -376,14 +376,14 @@ void sr_handlepacket(struct sr_instance* sr,
 	      }
 		  /*Reply is for this router, cache the reply*/
 		  if(located == 1){
-			  printf("replied to\n");
-		      fflush(stdout);
 			  struct sr_arpreq *requests =  sr_arpcache_insert(&(sr->cache),
                                          arp_hdr->ar_sha,
                                          arp_hdr->ar_sip);
 			  struct sr_packet *req_walker = requests->packets;
 			  /*Go through all the queued packets and send them*/
-			  while(req_walker){
+			  while(req_walker != NULL){
+				  printf("replied to\n");
+		          fflush(stdout);
 				  ehdr = (sr_ethernet_hdr_t *) req_walker->buf;
 				  memcpy(ehdr->ether_dhost, arp_hdr->ar_sha, sizeof(ehdr->ether_dhost));
 				  sr_send_packet(sr /* borrowed */,
