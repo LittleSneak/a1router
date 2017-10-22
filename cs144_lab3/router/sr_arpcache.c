@@ -30,6 +30,8 @@ void sr_arpcache_sweepreqs(struct sr_instance *sr) {
 /* Function for sending an ARP request for a given request
  */
 void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
+	printf("here0");
+	fflush(stdout);
 	time_t now;
 	time(&now);
 	/*Packet that will be sent*/
@@ -109,6 +111,8 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
 			request->sent = now;
 			request->times_sent = request->times_sent + 1;
 			free(reply);
+			printf("here4");
+			fflush(stdout);
 		}
 	}
 	return;
