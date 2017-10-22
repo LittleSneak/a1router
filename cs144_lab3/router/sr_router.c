@@ -155,7 +155,6 @@ void sr_handlepacket(struct sr_instance* sr,
 	  }
 	  /*Check if packet is meant for the router*/
 	  int found = 0;
-	  print_hdrs(packet, len);
 	  while (if_walker){
 		  if(if_walker->ip == iphdr->ip_dst){
 			  found = 1;
@@ -174,8 +173,6 @@ void sr_handlepacket(struct sr_instance* sr,
 		  }
 		  /*Handle echo requests*/
 		  if(icmp_hdr->icmp_type == 8 && found == 1){
-			  printf("here\n");
-	          print_hdrs(packet, len);
 			  uint8_t *reply = malloc(len);
 			  memcpy(reply, packet, len);
 			  retEhdr = (sr_ethernet_hdr_t *)reply;
