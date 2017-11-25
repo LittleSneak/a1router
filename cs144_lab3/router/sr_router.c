@@ -776,6 +776,8 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 	
 	/* Packet coming from external */
 	else{
+		printf("HERE\n");
+		fflush(stdout);
 		/* Handle incoming ICMP packet */
 		
 		/* TODO: handle pings to external if */
@@ -835,12 +837,16 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 			tcphdr->checksum = 0;
 			tcphdr->checksum = cksum(tcphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
 		}
+		printf("HERE2\n");
+		fflush(stdout);
 		memcpy(ehdr->ether_dhost, int_if->addr, sizeof(uint8_t) * 6);
 		iphdr->ip_dst = mapping->ip_int;
 		iphdr->ip_sum = 0;
 		iphdr->ip_sum = cksum(iphdr, sizeof(sr_ip_hdr_t));
 		printf("REPLY SENT TO:\n");
 		print_hdrs(packet, len);
+		printf("HERE3\n");
+		fflush(stdout);
 		sr_send_packet(sr, packet, len, "eth1");
 	}
 }
