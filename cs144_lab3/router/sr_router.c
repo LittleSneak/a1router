@@ -786,6 +786,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 			mapping = sr_nat_lookup_external(sr->nat, *icmp_id, nat_mapping_icmp);
 			/* Mapping not found drop packet */
 			if(mapping == NULL){
+				printf("No mapping\n\n");
 				return;
 			}
 			
