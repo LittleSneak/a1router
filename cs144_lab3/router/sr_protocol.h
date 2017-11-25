@@ -133,6 +133,47 @@ struct sr_ip_hdr
   } __attribute__ ((packed)) ;
 typedef struct sr_ip_hdr sr_ip_hdr_t;
 
+
+
+/* Structure for TCP header */
+/* Following the structure on wikipedia */
+struct sr_tcp_hdr{
+	uint16_t src_port;
+	uint16_t dst_port;
+	uint32_t seq_num;
+	uint32_t ack_num;
+	uint8_t offset;
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+    unsigned int fin:1;
+    unsigned int syn:1;
+	unsigned int rst:1;
+	unsigned int psh:1;
+	unsigned int ack:1;
+	unsigned int urg:1;
+	unsigned int ece:1;
+	unsigned int cwr:1;
+	unsigned int ns:1;
+#elif __BYTE_ORDER == __BIG_ENDIAN
+    unsigned int ns:1;
+	unsigned int cwr:1;
+	unsigned int ece:1;
+	unsigned int urg:1;
+	unsigned int ack:1;
+	unsigned int psh:1;
+	unsigned int rst:1;
+	unsigned int syn:1;
+	unsigned int fin:1;
+#else
+#error "Byte ordering ot specified " 
+#endif 
+    uint16_t window_size;
+	uint32_t checksum;
+	uint32_t urg_pointer;
+} __attribute__ ((packed)) ;
+typedef struct sr_tcp_hdr sr_tcp_hdr_t;
+
+
+
 /* 
  *  Ethernet packet header prototype.  Too many O/S's define this differently.
  *  Easy enough to solve that and define it here.

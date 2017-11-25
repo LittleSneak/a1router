@@ -41,14 +41,17 @@ void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request){
 	*/
     sr_arp_hdr_t *retARPhdr = NULL;
 	struct sr_if* if_walker = NULL;
+	struct sr_packet *packet_walker = NULL;
 	
 	
 	/* Check if it's been at least 1 second since last request */
 	if(difftime(now, request->sent) > 1){
+		/* Request sent 5 times, send back an ICMP error */
 		if(request->times_sent >= 5){
-			struct sr_packet *packet_walker = request->packets;
+			packet_walker = request->packets;
 			while(packet_walker){
-				send_icmp_type_3 (1, packet_walker->len, packet_walker->buf, sr);
+				send_icmp_type_3(1, packet_walker->len, packet_walker->buf, sr);
+				packet_walker = packet_walker->next;
 			}
 			sr_arpreq_destroy(&(sr->cache), request);
 			return;

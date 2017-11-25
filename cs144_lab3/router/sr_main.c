@@ -66,10 +66,14 @@ int main(int argc, char **argv)
     unsigned int topo = DEFAULT_TOPO;
     char *logfile = 0;
     struct sr_instance sr;
+	int nat = 0;
+	int icmp_timeout = 60;
+	int tcp_timeout_trans = 7440;
+	int tcp_timeout_est = 300;
 
     printf("Using %s\n", VERSION_INFO);
 
-    while ((c = getopt(argc, argv, "hs:v:p:u:t:r:l:T:")) != EOF)
+    while ((c = getopt(argc, argv, "hs:v:p:u:t:r:l:T:n:I:E:R:")) != EOF)
     {
         switch (c)
         {
@@ -101,6 +105,18 @@ int main(int argc, char **argv)
             case 'T':
                 template = optarg;
                 break;
+			case 'n':
+			    nat = 1;
+				break;
+			case 'I':
+			    icmp_timeout = atoi((char *) optarg);
+				break;
+			case 'E':
+			    tcp_timeout_est = atoi((char *) optarg);
+				break;
+			case 'R':
+			    tcp_timeout_trans = atoi((char *) optarg);
+				break;
         } /* switch */
     } /* -- while -- */
 
@@ -155,6 +171,12 @@ int main(int argc, char **argv)
       /* Read from specified routing table */
       sr_load_rt_wrap(&sr, rtable);
     }
+	
+	/* Put in nat variables */
+	sr.is_nat = nat;
+	sr.icmp_timeout = icmp_timeout;
+	sr.tcp_timeout_est = tcp_timeout_est;
+	sr.tcp_timeout_trans = tcp_timeout_trans;
 
     /* call router init (for arp subsystem etc.) */
     sr_init(&sr);

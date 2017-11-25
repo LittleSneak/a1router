@@ -54,6 +54,12 @@ struct sr_instance
     struct sr_arpcache cache;   /* ARP cache */
     pthread_attr_t attr;
     FILE* logfile;
+	int is_nat; /*Indicates whether nat is enabled or not*/
+	/* Timeout values for if nat is enabled */
+	int icmp_timeout;
+    int tcp_timeout_trans;
+    int tcp_timeout_est;
+	struct sr_nat *nat;
 };
 
 /* A helper function for sending type 3 ICMP errors */
@@ -69,7 +75,8 @@ int sr_read_from_server(struct sr_instance* );
 
 /* -- sr_router.c -- */
 void sr_init(struct sr_instance* );
-void sr_handlepacket(struct sr_instance* , uint8_t * , unsigned int , char* );
+void sr_handlepacket(struct sr_instance* , uint8_t * packet, unsigned int len, char* interface);
+void sr_handle_nat(struct sr_instance* , uint8_t * packet, unsigned int len, char* interface);
 
 /* -- sr_if.c -- */
 void sr_add_interface(struct sr_instance* , const char* );

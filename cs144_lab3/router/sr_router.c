@@ -22,6 +22,10 @@
 #include "sr_protocol.h"
 #include "sr_arpcache.h"
 #include "sr_utils.h"
+#include "sr_nat.h"
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 /*---------------------------------------------------------------------
  * Method: sr_init(void)
@@ -46,6 +50,17 @@ void sr_init(struct sr_instance* sr)
     pthread_t thread;
 
     pthread_create(&thread, &(sr->attr), sr_arpcache_timeout, sr);
+	
+	/* Handle nat initialization if needed */
+    if(sr->is_nat == 1){
+		struct sr_nat *nat = (struct sr_nat *) malloc(sizeof(struct sr_nat));
+	    sr_nat_init(nat);
+	    nat->icmp_timeout = sr->icmp_timeout;
+	    nat->tcp_timeout_est = sr->tcp_timeout_est;
+	    nat->tcp_timeout_trans = sr->tcp_timeout_trans;
+		sr->nat = nat;
+		nat->sr = sr;
+    }
     
     /* Add initialization code here! */
 
@@ -79,6 +94,7 @@ void sr_handlepacket(struct sr_instance* sr,
 
   printf("*** -> Received packet of length %d \n",len);
   /* fill in code here */
+  
   /*Perform minimum packet length checks*/
   /*and identify packet type*/
   /*Structures for handling ICMP replies*/
@@ -141,6 +157,12 @@ void sr_handlepacket(struct sr_instance* sr,
   
   /*Handle IP packet or an ICMP packet*/
   if(type == 0 || type == 1){
+	  /* If nat is enabled, handle this in the sr_handle_nat function */
+	  if(sr->is_nat == 1){
+		  sr_handle_nat(sr, packet, len, interface);
+		  return;
+	  }
+	  
 	  /*Obtain ip header*/
 	  iphdr = (sr_ip_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Check the checksum*/
@@ -156,7 +178,6 @@ void sr_handlepacket(struct sr_instance* sr,
 	  /*Check if packet is meant for the router*/
 	  int found = 0;
 	  if_walker = sr->if_list;
-	  print_hdrs(packet, len);
 	  while (if_walker){
 		  if(if_walker->ip == iphdr->ip_dst){
 			  found = 1;
@@ -170,6 +191,7 @@ void sr_handlepacket(struct sr_instance* sr,
 		  
 		  /* Checksum is not working...
 		  sum = icmp_hdr->icmp_sum;
+		  printf("%u %u\n", sum, cksum(icmp_hdr, sizeof(sr_icmp_hdr_t) + 8));
 		  if(cksum(icmp_hdr, sizeof(sr_icmp_hdr_t)) != sum){
 			  printf("Checksum failed\n");
 			  return;
@@ -216,13 +238,14 @@ void sr_handlepacket(struct sr_instance* sr,
 			  arpentry = sr_arpcache_lookup(&(sr->cache), retIPhdr->ip_dst);
 		      /*Not cache queue the packet */
 		      if(arpentry == NULL){
-			      sr_arpcache_queuereq(&(sr->cache),
+			  sr_arpcache_queuereq(&(sr->cache),
                                        iphdr->ip_src,
                                        reply,           /* borrowed */
                                        len,
                                        rt_walker->interface);
 		      }
 			  else{
+                  memcpy(retEhdr->ether_dhost, arpentry->mac, sizeof(retEhdr->ether_shost));
 				  /*Send the echo reply*/
 			      sr_send_packet(sr /* borrowed */,
                          reply /* borrowed */ ,
@@ -233,8 +256,7 @@ void sr_handlepacket(struct sr_instance* sr,
 		  }
 	  }
 	  /*Packet is meant for router and is not an ICMP*/
-	  else if (iphdr->ip_p == 6 || iphdr->ip_p == 17){
-		  printf("Not for this router\n");
+	  else if (found == 1){
 		  send_icmp_type_3(3, len, packet, sr);
 		  return;
 	  }
@@ -457,13 +479,19 @@ void sr_handlepacket(struct sr_instance* sr,
 			  /*Go through all the queued packets and send them*/
 			  while(req_walker != NULL){
 				  ehdr = (sr_ethernet_hdr_t *) req_walker->buf;
-				  memcpy(ehdr->ether_dhost, arp_hdr->ar_sha, sizeof(ehdr->ether_dhost));
+				  memcpy(ehdr->ether_dhost, arp_hdr->ar_tha, sizeof(ehdr->ether_dhost));
 				  memcpy(ehdr->ether_shost, if_walker->addr, sizeof(ehdr->ether_dhost));
-				  
+				  if_walker = sr->if_list;
+                                  while(if_walker){
+                                      if(memcmp(if_walker->addr, arp_hdr->ar_tha, sizeof(unsigned char) * 6) == 0){
+                                          break;
+                                      }
+                                      if_walker = if_walker->next;
+                                  }
 				  sr_send_packet(sr /* borrowed */,
-                         req_walker->buf /* borrowed */ ,
-                         req_walker->len,
-                         req_walker->iface /* borrowed */);
+                                      req_walker->buf /* borrowed */ ,
+                                      req_walker->len,
+                                      if_walker->name /* borrowed */);
 				  req_walker = req_walker->next;
 			  }
 			  /*Free all requests related to this reply*/
@@ -478,7 +506,6 @@ void sr_handlepacket(struct sr_instance* sr,
 void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct sr_instance *sr){
 	
 	int arp = 1;
-	struct sr_rt* rt_walker = NULL;
 	struct sr_if* if_walker = NULL;
 	uint8_t *reply = malloc(sizeof(sr_ethernet_hdr_t) 
 	    + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t));
@@ -514,7 +541,6 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		retIPhdr->ip_dst = iphdr->ip_src;
 		retIPhdr->ip_sum = 0;
 		retIPhdr->ip_ttl = 64;
-		retIPhdr->ip_id = 0;
 		/* Set up the ICMP header */
 		retICMPhdr->icmp_type = 3;
 		retICMPhdr->icmp_code = code;
@@ -534,20 +560,9 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		
 		retICMPhdr->icmp_sum = cksum(retICMPhdr, sizeof(sr_icmp_t3_hdr_t));
 		/* Find interface */
-		rt_walker = sr->routing_table;
-		while(rt_walker){
-			if(rt_walker->dest.s_addr == retIPhdr->ip_dst){
-				break;
-			}
-			rt_walker = rt_walker->next;
-		}
-		if(rt_walker == NULL){
-			return;
-		}
-		/* Find the source ip */
 		if_walker = sr->if_list;
 		while(if_walker){
-			if(strcmp(if_walker->name, rt_walker->interface) == 0){
+			if(memcmp(if_walker->addr, ehdr->ether_dhost, sizeof(unsigned char) * 6) == 0){
 				break;
 			}
 			if_walker = if_walker->next;
@@ -555,13 +570,18 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		if(if_walker == NULL){
 			return;
 		}
-		retIPhdr->ip_src = if_walker->ip;
+        if(code == 3){
+            retIPhdr->ip_src = iphdr->ip_dst;
+        }
+        else{
+            retIPhdr->ip_src = if_walker->ip;
+        }
 		retIPhdr->ip_sum = cksum(retIPhdr, sizeof(sr_ip_hdr_t));
 		memcpy(retEhdr->ether_shost, if_walker->addr, sizeof(uint8_t) * 6);
 		sr_send_packet(sr,
                        reply,
                        sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t),
-                       rt_walker->interface);
+                       if_walker->name);
 		free(reply);
 		return;
 	}
@@ -601,29 +621,17 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		
 		retICMPhdr->icmp_sum = cksum(retICMPhdr, sizeof(sr_icmp_t3_hdr_t));
 		
-		/* Find interface */
-		rt_walker = sr->routing_table;
-		while(rt_walker){
-			if(rt_walker->dest.s_addr == retIPhdr->ip_dst){
-				break;
-			}
-			rt_walker = rt_walker->next;
-		}
-		if(rt_walker == NULL){
-			return;
-		}
-		
 		/* Find the IP address of the interface */
-		if_walker = sr->if_list;
+                if_walker = sr->if_list;
 		while(if_walker){
-			if(strcmp(rt_walker->interface, if_walker->name) == 0){
+		    if(memcmp(if_walker->addr, ehdr->ether_dhost, sizeof(unsigned char) * 6) == 0){
 				break;
 			}
 			if_walker = if_walker->next;
-		}
-		if(if_walker == NULL){
-			return;
-		}
+		    }
+		    if(if_walker == NULL){
+			    return;
+		    }
 		retIPhdr->ip_src = if_walker->ip;
 		retIPhdr->ip_sum = cksum(retIPhdr, sizeof(sr_ip_hdr_t));
 		memcpy(retEhdr->ether_shost, if_walker->addr, sizeof(uint8_t) * 6);
@@ -631,9 +639,185 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 		sr_send_packet(sr,
                        reply,
                        sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_t3_hdr_t),
-                       rt_walker->interface);
+                       if_walker->name);
 		free(reply);
 		return;
 	}
 	
 }
+
+/* Function for handling IP packets when nat is enabled
+ */
+void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, char* interface){
+	sr_ip_hdr_t *iphdr = (sr_ip_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t));
+	sr_icmp_hdr_t *icmphdr = NULL;
+	uint16_t *icmp_id = 0;   /* The port/id for icmp */
+	sr_tcp_hdr_t *tcphdr = NULL;
+	struct sr_nat_mapping *mapping = NULL;
+	struct sr_nat_connection *connection = NULL;
+	
+	/* Check if it is going to one of our interfaces */
+	struct sr_if* if_walker = sr->if_list;
+	while(if_walker != NULL){
+		if(if_walker->ip == iphdr->ip_dst){
+			break;
+		}
+		if_walker = if_walker->next;
+	}
+	
+	/* Get the external interface */
+	struct sr_if* ext_if = sr_get_interface(sr, "eth2");
+	
+	/* Check if IP or ICMP packet */
+	uint8_t ip_proto = ip_protocol(packet + sizeof(sr_ethernet_hdr_t));
+	/* Drop UDP packet */
+	if(ip_proto == 0x0011){
+		return;
+	}
+	
+	/* Packet coming from internal */
+	if(strncmp(interface, "eth1", 4)){
+		/* IP packet sent to our interface, port unreachable */
+		if(if_walker != NULL){
+			send_icmp_type_3 (3, len, packet, sr);
+			return;
+		}
+		/* Otherwise, handle packet */
+		
+		/* Handle ICMP packet */
+		if (ip_proto == ip_protocol_icmp) {
+			/* TODO: handle checksum */
+			icmphdr = (sr_icmp_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
+			icmp_id = (uint16_t *) (packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
+			mapping = sr_nat_lookup_internal(sr->nat, iphdr->ip_src, *icmp_id, nat_mapping_icmp);
+			/* Mapping not found add it */
+			if(mapping == NULL){
+				mapping = sr_nat_insert_mapping(sr->nat, iphdr->ip_src, *icmp_id, nat_mapping_icmp);
+			}
+			
+			/* Update ICMP header */
+			*icmp_id = mapping->aux_ext;
+			icmphdr->icmp_sum = 0;
+			icmphdr->icmp_sum = cksum(icmphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
+		}
+		
+		/* Handle TCP packet */
+		else{
+			/* TODO: handle checksum */
+			tcphdr = (sr_tcp_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
+			mapping = sr_nat_lookup_internal(sr->nat, iphdr->ip_src, ntohs(tcphdr->src_port), nat_mapping_tcp);
+			/* No mapping yet, add it */
+			if(mapping == NULL){
+				mapping = sr_nat_insert_mapping(sr->nat, iphdr->ip_src, tcphdr->src_port, nat_mapping_tcp);
+			}
+			
+			/* Find connection, insert if it does not exist */
+			connection = sr_nat_lookup_connection(sr->nat, mapping, iphdr->ip_dst);
+			if(connection == NULL){
+				connection = sr_nat_insert_connection(sr->nat, mapping, iphdr->ip_dst);
+			}
+			
+			pthread_mutex_lock(&(sr->nat->lock));
+			/* Update connection state to keep track of 3-way handshake */
+			switch(connection->state){
+				/* Connection goes from listen to syn_sent when sending SYN */
+				case tcp_listen:{
+					if(tcphdr->syn == 1){
+						connection->state = tcp_syn_sent;
+					}
+				}
+				/* Recieved goes to established */
+				case tcp_rcvd:{
+					if(tcphdr->ack == 1){
+						connection->state = tcp_established;
+					}
+				}
+				/* Acknowledging a fin means that the connection is closed */
+				case tcp_established:{
+					if(tcphdr->fin == 1 && tcphdr->ack == 1){
+						connection->state = tcp_closed;
+					}
+				}
+				default:{
+					break;
+				}
+			}
+			pthread_mutex_unlock(&(sr->nat->lock));
+			/* Update tcp headers */
+			tcphdr->src_port = htons(mapping->aux_ext);
+			tcphdr->checksum = 0;
+			tcphdr->checksum = cksum(tcphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
+		}
+		iphdr->ip_src = inet_addr("172.64.3.1");
+		iphdr->ip_sum = 0;
+		iphdr->ip_sum = cksum(iphdr, sizeof(sr_ip_hdr_t));
+		sr_send_packet(sr, packet, len, "eth2");
+	}
+	
+	/* Packet coming from external */
+	else{
+		/* Handle incoming ICMP packet */
+		
+		/* TODO: handle pings to external if */
+		if (ip_proto == ip_protocol_icmp) {
+			/* TODO: handle checksum */
+			icmp_id = (uint16_t *) (packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
+			mapping = sr_nat_lookup_external(sr->nat, *icmp_id, nat_mapping_icmp);
+			/* Mapping not found drop packet */
+			if(mapping == NULL){
+				return;
+			}
+			
+			/* Update ICMP header */
+			*icmp_id = mapping->aux_int;
+			icmphdr->icmp_sum = 0;
+			icmphdr->icmp_sum = cksum(icmphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
+		}
+		
+		/* Handle incoming TCP packet */
+		else{
+			/* TODO: handle checksum */
+			tcphdr = (sr_tcp_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
+			mapping = sr_nat_lookup_external(sr->nat, tcphdr->dst_port, nat_mapping_tcp);
+			/* Mapping not found add to incoming list if it is SYN */
+			if(mapping == NULL){
+				if(tcphdr->syn == 1){
+					sr_nat_insert_incoming(sr->nat, packet, len, iphdr->ip_src);
+				}
+				return;
+			}
+			
+			/* Get connection */
+			connection = sr_nat_lookup_connection(sr->nat, mapping, iphdr->ip_src);
+			pthread_mutex_lock(&(sr->nat->lock));
+			/* Update connection state to keep track of 3-way handshake */
+			switch(connection->state){
+				/* Connection goes from sent to recieved */
+				case tcp_syn_sent:{
+					if(tcphdr->ack == 1){
+						connection->state = tcp_established;
+					}
+				}
+				/* Check if fin was requested */
+				case tcp_established:{
+					if(tcphdr->fin == 1){
+						connection->state = tcp_transitory;
+					}
+				}
+				default:{
+					break;
+				}
+			}
+			pthread_mutex_unlock(&(sr->nat->lock));
+			/* Update tcp headers */
+			tcphdr->dst_port = htons(mapping->aux_int);
+			tcphdr->checksum = 0;
+			tcphdr->checksum = cksum(tcphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
+		}
+		iphdr->ip_dst = mapping->ip_int;
+		iphdr->ip_sum = 0;
+		iphdr->ip_sum = cksum(iphdr, sizeof(sr_ip_hdr_t));
+		sr_send_packet(sr, packet, len, "eth1");
+	}
+}
+
