@@ -748,7 +748,8 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 			tcphdr->checksum = cksum(tcphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
 		}
 		memcpy(ehdr->ether_shost, ext_if->addr, sizeof(uint8_t) * 6);
-		iphdr->ip_src = inet_addr("172.64.3.1");
+		print_hdrs(packet, len);
+		iphdr->ip_src = ext_if->ip;
 		iphdr->ip_sum = 0;
 		iphdr->ip_sum = cksum(iphdr, sizeof(sr_ip_hdr_t));
 		sr_send_packet(sr, packet, len, "eth2");
