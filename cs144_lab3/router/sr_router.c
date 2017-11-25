@@ -374,6 +374,8 @@ void sr_handlepacket(struct sr_instance* sr,
   
   /*Handle ARP packet*/
   if(type == 2){
+	  printf("Handling arp...");
+	  fflush(stdout);
 	  /*Obtain ARP header*/
 	  arp_hdr = (sr_arp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Handle arp request*/
@@ -753,9 +755,6 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 		iphdr->ip_src = inet_addr("172.64.3.1");
 		iphdr->ip_sum = 0;
 		iphdr->ip_sum = cksum(iphdr, sizeof(sr_ip_hdr_t));
-		printf("NEW:\n");
-		print_hdrs(packet, len);
-		fflush(stdout);
 		sr_send_packet(sr, packet, len, "eth2");
 	}
 	
