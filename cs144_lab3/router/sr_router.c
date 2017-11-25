@@ -648,6 +648,7 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 /* Function for handling IP packets when nat is enabled
  */
 void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, char* interface){
+	sr_ethernet_hdr_t *ehdr = (sr_ethernet_hdr_t *) packet;
 	sr_ip_hdr_t *iphdr = (sr_ip_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t));
 	sr_icmp_hdr_t *icmphdr = NULL;
 	uint16_t *icmp_id = 0;   /* The port/id for icmp */
@@ -748,6 +749,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 			tcphdr->checksum = 0;
 			tcphdr->checksum = cksum(tcphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
 		}
+		memcpy(ehdr->ether_shost, ext_if->addr, sizeof(uint8_t) * 6);
 		iphdr->ip_src = inet_addr("172.64.3.1");
 		iphdr->ip_sum = 0;
 		iphdr->ip_sum = cksum(iphdr, sizeof(sr_ip_hdr_t));
