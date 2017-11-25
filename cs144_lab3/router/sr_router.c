@@ -776,28 +776,20 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 	
 	/* Packet coming from external */
 	else{
-		printf("HERE\n");
-		fflush(stdout);
 		/* Handle incoming ICMP packet */
 		
 		/* TODO: handle pings to external if */
 		if (ip_proto == ip_protocol_icmp) {
-			printf("HERE2\n");
-		fflush(stdout);
 			/* TODO: handle checksum */
+			icmphdr = (sr_icmp_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
 			icmp_id = (uint16_t *) (packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
 			mapping = sr_nat_lookup_external(sr->nat, *icmp_id, nat_mapping_icmp);
 			/* Mapping not found drop packet */
 			if(mapping == NULL){
-				printf("No mapping\n\n");
 				return;
 			}
-			printf("HERE3\n");
-		fflush(stdout);
 			/* Update ICMP header */
 			*icmp_id = mapping->aux_int;
-			printf("HERE4\n");
-		fflush(stdout);
 			icmphdr->icmp_sum = 0;
 			icmphdr->icmp_sum = cksum(icmphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
 		}
