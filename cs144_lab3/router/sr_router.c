@@ -671,6 +671,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 	
 	/* Get the external interface */
 	struct sr_if* ext_if = sr_get_interface(sr, "eth2");
+	struct sr_if* int_if = sr_get_interface(sr, "eth1");
 	
 	/* Check if IP or ICMP packet */
 	uint8_t ip_proto = ip_protocol(packet + sizeof(sr_ethernet_hdr_t));
@@ -835,6 +836,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 			tcphdr->checksum = 0;
 			tcphdr->checksum = cksum(tcphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
 		}
+		memcpy(ehdr->ether_dhost, int_if->addr, sizeof(uint8_t) * 6);
 		iphdr->ip_dst = mapping->ip_int;
 		iphdr->ip_sum = 0;
 		iphdr->ip_sum = cksum(iphdr, sizeof(sr_ip_hdr_t));
