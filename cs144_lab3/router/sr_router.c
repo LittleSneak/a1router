@@ -94,7 +94,7 @@ void sr_handlepacket(struct sr_instance* sr,
 
   printf("*** -> Received packet of length %d \n",len);
   /* fill in code here */
-  
+  print_hdrs(packet, len);
   /*Perform minimum packet length checks*/
   /*and identify packet type*/
   /*Structures for handling ICMP replies*/

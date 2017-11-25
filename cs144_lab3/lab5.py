@@ -31,9 +31,9 @@ class CS144Topo( Topo ):
         nat = self.addSwitch( 'sw0' )
         bridge = self.addSwitch( 'sw1' )
         client = self.addHost('client')
-        self.add_link(client, nat)
+        self.addLink(client, nat)
         for h in server1, server2, nat: #client, root:
-            self.add_link( h,  bridge)
+            self.addLink( h,  bridge)
 
 
 class CS144Controller( Controller ):
