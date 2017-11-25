@@ -676,7 +676,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 	}
 	
 	/* Packet coming from internal */
-	if(strncmp(interface, "eth1", 4)){
+	if(strncmp(interface, "eth3", 4)){
 		/* IP packet sent to our interface, port unreachable */
 		if(if_walker != NULL){
 			send_icmp_type_3 (3, len, packet, sr);
