@@ -796,10 +796,10 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 		fflush(stdout);
 			/* Update ICMP header */
 			*icmp_id = mapping->aux_int;
-			icmphdr->icmp_sum = 0;
-			icmphdr->icmp_sum = cksum(icmphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
 			printf("HERE4\n");
 		fflush(stdout);
+			icmphdr->icmp_sum = 0;
+			icmphdr->icmp_sum = cksum(icmphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
 		}
 		
 		/* Handle incoming TCP packet */
