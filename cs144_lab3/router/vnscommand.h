@@ -1,12 +1,12 @@
 /*-----------------------------------------------------------------------------
-   File:   vnscommand.h
-   Date:   Sat Apr 06 21:58:07 PST 2002
+   File:   vnscommand.h 
+   Date:   Sat Apr 06 21:58:07 PST 2002 
    Contact:  casado@stanford.edu
-
+  
    Description:
-
+  
    A c-style declaration of commands for the virtual router.
-
+  
   ---------------------------------------------------------------------------*/
 
 #ifndef __VNSCOMMAND_H
@@ -27,15 +27,16 @@
 typedef struct
 {
     uint32_t mLen;
-    uint32_t mType;
+    uint32_t mType;        
 }__attribute__ ((__packed__)) c_base;
 
 /*-----------------------------------------------------------------------------
                                  OPEN
   ---------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct 
 {
+
     uint32_t mLen;
     uint32_t mType;        /* = VNSOPEN */
     uint16_t topoID;       /* Id of the topology we want to run on */
@@ -44,38 +45,45 @@ typedef struct
                                         'VNS-A'); */
     char     mUID[IDSIZE]; /* User id (e.g. "appenz"), for information only */
     char     mPass[IDSIZE];
+
 }__attribute__ ((__packed__)) c_open;
 
 /*-----------------------------------------------------------------------------
                                  CLOSE
   ---------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct 
 {
-    uint32_t mLen;
-    uint32_t mType;
+
+    uint32_t mLen; 
+    uint32_t mType; 
     char     mErrorMessage[256];
+
 }__attribute__ ((__packed__)) c_close;
 
 /*-----------------------------------------------------------------------------
-                                HWREQUEST
+                                HWREQUEST 
   ---------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct 
 {
+
     uint32_t mLen;
-    uint32_t mType;
+    uint32_t mType; 
+
 }__attribute__ ((__packed__)) c_hwrequest;
 
 /*-----------------------------------------------------------------------------
-                                 BANNER
+                                 BANNER 
   ---------------------------------------------------------------------------*/
 
-typedef struct
+typedef struct 
 {
-    uint32_t mLen;
-    uint32_t mType;
+
+    uint32_t mLen; 
+    uint32_t mType; 
     char     mBannerMessage[256];
+
 }__attribute__ ((__packed__)) c_banner;
 
 /*-----------------------------------------------------------------------------
@@ -91,6 +99,7 @@ typedef struct
     uint8_t  ether_dhost[6];
     uint8_t  ether_shost[6];
     uint16_t ether_type;
+
 }__attribute__ ((__packed__)) c_packet_ethernet_header;
 
 typedef struct
@@ -101,7 +110,7 @@ typedef struct
 }__attribute__ ((__packed__)) c_packet_header;
 
 /*-----------------------------------------------------------------------------
-                               HWInfo
+                               HWInfo 
   ----------------------------------------------------------------------------*/
 
 #define HWINTERFACE    1
@@ -184,6 +193,7 @@ typedef struct
     uint32_t mType;
     uint8_t  auth_ok;
     char     msg[0];
+
 }__attribute__ ((__packed__)) c_auth_status;
 
 
