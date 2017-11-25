@@ -782,6 +782,8 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 		
 		/* TODO: handle pings to external if */
 		if (ip_proto == ip_protocol_icmp) {
+			printf("HERE2\n");
+		fflush(stdout);
 			/* TODO: handle checksum */
 			icmp_id = (uint16_t *) (packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t) + sizeof(sr_icmp_hdr_t));
 			mapping = sr_nat_lookup_external(sr->nat, *icmp_id, nat_mapping_icmp);
@@ -790,11 +792,14 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 				printf("No mapping\n\n");
 				return;
 			}
-			
+			printf("HERE3\n");
+		fflush(stdout);
 			/* Update ICMP header */
 			*icmp_id = mapping->aux_int;
 			icmphdr->icmp_sum = 0;
 			icmphdr->icmp_sum = cksum(icmphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
+			printf("HERE4\n");
+		fflush(stdout);
 		}
 		
 		/* Handle incoming TCP packet */
@@ -837,16 +842,10 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 			tcphdr->checksum = 0;
 			tcphdr->checksum = cksum(tcphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
 		}
-		printf("HERE2\n");
-		fflush(stdout);
 		memcpy(ehdr->ether_dhost, int_if->addr, sizeof(uint8_t) * 6);
 		iphdr->ip_dst = mapping->ip_int;
 		iphdr->ip_sum = 0;
 		iphdr->ip_sum = cksum(iphdr, sizeof(sr_ip_hdr_t));
-		printf("REPLY SENT TO:\n");
-		print_hdrs(packet, len);
-		printf("HERE3\n");
-		fflush(stdout);
 		sr_send_packet(sr, packet, len, "eth1");
 	}
 }
