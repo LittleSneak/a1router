@@ -374,8 +374,6 @@ void sr_handlepacket(struct sr_instance* sr,
   
   /*Handle ARP packet*/
   if(type == 2){
-	  printf("Handling arp...");
-	  fflush(stdout);
 	  /*Obtain ARP header*/
 	  arp_hdr = (sr_arp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Handle arp request*/
@@ -532,7 +530,6 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 	
 	/* The packet was not an ARP packet */
 	if(arp == 0){
-		print_hdrs(packet, len);
 		sr_ip_hdr_t *iphdr = (sr_ip_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t));
 		sr_icmp_hdr_t *icmphdr = (sr_icmp_hdr_t *) (packet + 
 	        sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
@@ -679,7 +676,6 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 	
 	/* Packet coming from internal */
 	if(strncmp(interface, "eth3", 4)){
-		print_hdrs(packet, len);
 		/* IP packet sent to our interface, port unreachable */
 		if(if_walker != NULL){
 			send_icmp_type_3 (3, len, packet, sr);
@@ -760,6 +756,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 	
 	/* Packet coming from external */
 	else{
+		print_hdrs(packet, len);
 		/* Handle incoming ICMP packet */
 		
 		/* TODO: handle pings to external if */
