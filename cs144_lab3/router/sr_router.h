@@ -15,6 +15,7 @@
 
 #include "sr_protocol.h"
 #include "sr_arpcache.h"
+#include "sr_nat.h"
 
 /* we dont like this debug , but what to do for varargs ? */
 #ifdef _DEBUG_
@@ -43,45 +44,47 @@ struct sr_rt;
 
 struct sr_instance
 {
-    int  sockfd;   /* socket to server */
-    char user[32]; /* user name */
-    char host[32]; /* host name */ 
+    int sockfd;        /* socket to server */
+    char user[32];     /* user name */
+    char host[32];     /* host name */
     char template[30]; /* template name if any */
     unsigned short topo_id;
-    struct sockaddr_in sr_addr; /* address to server */
-    struct sr_if* if_list; /* list of interfaces */
-    struct sr_rt* routing_table; /* routing table */
-    struct sr_arpcache cache;   /* ARP cache */
+    struct sockaddr_in sr_addr;  /* address to server */
+    struct sr_if *if_list;       /* list of interfaces */
+    struct sr_rt *routing_table; /* routing table */
+    struct sr_arpcache cache;    /* ARP cache */
     pthread_attr_t attr;
-    FILE* logfile;
-	int is_nat; /*Indicates whether nat is enabled or not*/
-	/* Timeout values for if nat is enabled */
-	int icmp_timeout;
-    int tcp_timeout_trans;
-    int tcp_timeout_est;
-	struct sr_nat *nat;
+    FILE *logfile;
+
+    /* NAT */
+    int enable_nat;
+    struct sr_nat nat;
 };
 
-/* A helper function for sending type 3 ICMP errors */
-void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct sr_instance *sr);
-
 /* -- sr_main.c -- */
-int sr_verify_routing_table(struct sr_instance* sr);
+int sr_verify_routing_table(struct sr_instance *sr);
 
 /* -- sr_vns_comm.c -- */
-int sr_send_packet(struct sr_instance* , uint8_t* , unsigned int , const char*);
-int sr_connect_to_server(struct sr_instance* ,unsigned short , char* );
-int sr_read_from_server(struct sr_instance* );
+int sr_send_packet(struct sr_instance *, uint8_t *, unsigned int, const char *);
+int sr_connect_to_server(struct sr_instance *, unsigned short, char *);
+int sr_read_from_server(struct sr_instance *);
 
 /* -- sr_router.c -- */
-void sr_init(struct sr_instance* );
-void sr_handlepacket(struct sr_instance* , uint8_t * packet, unsigned int len, char* interface);
-void sr_handle_nat(struct sr_instance* , uint8_t * packet, unsigned int len, char* interface);
+void sr_init(struct sr_instance *);
+void sr_handlepacket(struct sr_instance *, uint8_t *, unsigned int, char *);
+
+/* Custom */
+void handle_arp(struct sr_instance *, uint8_t *, unsigned int, char *);
+void handle_ip(struct sr_instance *, uint8_t *, unsigned int, char *);
+void handle_ip_nat(struct sr_instance *, uint8_t *, unsigned int, char *);
+void send_packet(struct sr_instance *, uint8_t *, unsigned int, struct sr_if *, uint32_t);
+void forward_ip(struct sr_instance *, uint8_t *, unsigned int);
+void send_icmp_msg(struct sr_instance *, uint8_t *, unsigned int, uint8_t, uint8_t);
 
 /* -- sr_if.c -- */
-void sr_add_interface(struct sr_instance* , const char* );
-void sr_set_ether_ip(struct sr_instance* , uint32_t );
-void sr_set_ether_addr(struct sr_instance* , const unsigned char* );
-void sr_print_if_list(struct sr_instance* );
+void sr_add_interface(struct sr_instance *, const char *);
+void sr_set_ether_ip(struct sr_instance *, uint32_t);
+void sr_set_ether_addr(struct sr_instance *, const unsigned char *);
+void sr_print_if_list(struct sr_instance *);
 
 #endif /* SR_ROUTER_H */

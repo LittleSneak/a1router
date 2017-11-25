@@ -71,47 +71,49 @@
 #include <pthread.h>
 #include "sr_if.h"
 
-#define SR_ARPCACHE_SZ    100  
-#define SR_ARPCACHE_TO    15.0
+#define SR_ARPCACHE_SZ 100
+#define SR_ARPCACHE_TO 15.0
 
-struct sr_packet {
-    uint8_t *buf;               /* A raw Ethernet frame, presumably with the dest MAC empty */
-    unsigned int len;           /* Length of raw Ethernet frame */
-    char *iface;                /* The outgoing interface */
+struct sr_packet
+{
+    uint8_t *buf;     /* A raw Ethernet frame, presumably with the dest MAC empty */
+    unsigned int len; /* Length of raw Ethernet frame */
+    char *iface;      /* The outgoing interface */
     struct sr_packet *next;
 };
 
-struct sr_arpentry {
-    unsigned char mac[6]; 
-    uint32_t ip;                /* IP addr in network byte order */
-    time_t added;         
+struct sr_arpentry
+{
+    unsigned char mac[6];
+    uint32_t ip; /* IP addr in network byte order */
+    time_t added;
     int valid;
 };
 
-struct sr_arpreq {
+struct sr_arpreq
+{
     uint32_t ip;
-    time_t sent;                /* Last time this ARP request was sent. You 
-                                   should update this. If the ARP request was 
+    time_t sent;               /* Last time this ARP request was sent. You
+                                   should update this. If the ARP request was
                                    never sent, will be 0. */
-    uint32_t times_sent;        /* Number of times this request was sent. You 
+    uint32_t times_sent;       /* Number of times this request was sent. You
                                    should update this. */
-    struct sr_packet *packets;  /* List of pkts waiting on this req to finish */
+    struct sr_packet *packets; /* List of pkts waiting on this req to finish */
     struct sr_arpreq *next;
 };
 
-struct sr_arpcache {
+struct sr_arpcache
+{
     struct sr_arpentry entries[SR_ARPCACHE_SZ];
     struct sr_arpreq *requests;
     pthread_mutex_t lock;
     pthread_mutexattr_t attr;
 };
 
+/* Custom */
+void handle_arpreq(struct sr_instance *, struct sr_arpreq *);
 
-/* Function for sending an ARP request for a given request
- */
-void handle_arpreq(struct sr_instance *sr, struct sr_arpreq *request);
-
-/* Checks if an IP->MAC mapping is in the cache. IP is in network byte order. 
+/* Checks if an IP->MAC mapping is in the cache. IP is in network byte order.
    You must free the returned structure if it is not NULL. */
 struct sr_arpentry *sr_arpcache_lookup(struct sr_arpcache *cache, uint32_t ip);
 
@@ -123,10 +125,10 @@ struct sr_arpentry *sr_arpcache_lookup(struct sr_arpcache *cache, uint32_t ip);
    A pointer to the ARP request is returned; it should be freed. The caller
    can remove the ARP request from the queue by calling sr_arpreq_destroy. */
 struct sr_arpreq *sr_arpcache_queuereq(struct sr_arpcache *cache,
-                         uint32_t ip,
-                         uint8_t *packet,               /* borrowed */
-                         unsigned int packet_len,
-                         char *iface);
+                                       uint32_t ip,
+                                       uint8_t *packet, /* borrowed */
+                                       unsigned int packet_len,
+                                       char *iface);
 
 /* This method performs two functions:
    1) Looks up this IP in the request queue. If it is found, returns a pointer
@@ -148,8 +150,8 @@ void sr_arpcache_dump(struct sr_arpcache *cache);
    a destructor, and a cleanup thread times out cache entries every 15
    seconds. */
 
-int   sr_arpcache_init(struct sr_arpcache *cache);
-int   sr_arpcache_destroy(struct sr_arpcache *cache);
+int sr_arpcache_init(struct sr_arpcache *cache);
+int sr_arpcache_destroy(struct sr_arpcache *cache);
 void *sr_arpcache_timeout(void *cache_ptr);
 
 #endif

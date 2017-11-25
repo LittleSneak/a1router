@@ -13,7 +13,6 @@
 #include <string.h>
 #include <unistd.h>
 
-
 #include <sys/socket.h>
 #include <netinet/in.h>
 #define __USE_MISC 1 /* force linux to show inet_aton */
@@ -22,19 +21,68 @@
 #include "sr_rt.h"
 #include "sr_router.h"
 
+#include "sr_utils.h"
+
+/* Custom method: finds the entry in the routing table with the longest matching prefix */
+struct sr_rt *longest_matching_prefix(struct sr_instance *sr, uint32_t ip)
+{
+    struct sr_rt *match = NULL;
+
+    fprintf(stderr, "Trying to find longest matching prefix for: ");
+    print_addr_ip_int(ntohl(ip));
+
+    struct sr_rt *route = sr->routing_table;
+    while (route)
+    {
+        /* Check if route's (masked) address matches our IP */
+        if ((route->dest.s_addr & route->mask.s_addr) == (ip & route->mask.s_addr))
+        {
+            /* Check if it's longer based on the mask */
+            if (!match || route->mask.s_addr > match->mask.s_addr)
+            {
+                match = route;
+            }
+        }
+
+        route = route->next;
+    }
+
+    if (match)
+    {
+        char dest_str[15];
+        char gw_str[15];
+        char mask_str[15];
+        addr_ip_int(dest_str, ntohl(match->dest.s_addr));
+        addr_ip_int(gw_str, ntohl(match->gw.s_addr));
+        addr_ip_int(mask_str, ntohl(match->mask.s_addr));
+        printf(
+            "Found match for prefix: {dest:\"%s\",gw:\"%s\",mask:\"%s\",interface:\"%s\"}\n",
+            dest_str,
+            gw_str,
+            mask_str,
+            match->interface);
+    }
+    else
+    {
+        printf("Couldn't find a prefix\n");
+    }
+
+    return match;
+}
+
 /*---------------------------------------------------------------------
  * Method:
  *
  *---------------------------------------------------------------------*/
 
-int sr_load_rt(struct sr_instance* sr,const char* filename)
+int sr_load_rt(struct sr_instance *sr, const char *filename)
 {
-    FILE* fp;
-    char  line[BUFSIZ];
-    char  dest[32];
-    char  gw[32];
-    char  mask[32];
-    char  iface[32];
+    FILE *fp;
+    char line[BUFSIZ];
+    char dest[32];
+    char gw[32];
+    char mask[32];
+    char iface[32];
     struct in_addr dest_addr;
     struct in_addr gw_addr;
     struct in_addr mask_addr;
@@ -42,44 +90,45 @@ int sr_load_rt(struct sr_instance* sr,const char* filename)
 
     /* -- REQUIRES -- */
     assert(filename);
-    if( access(filename,R_OK) != 0)
+    if (access(filename, R_OK) != 0)
     {
         perror("access");
         return -1;
     }
 
-    fp = fopen(filename,"r");
+    fp = fopen(filename, "r");
 
-    while( fgets(line,BUFSIZ,fp) != 0)
+    while (fgets(line, BUFSIZ, fp) != 0)
     {
-        sscanf(line,"%s %s %s %s",dest,gw,mask,iface);
-        if(inet_aton(dest,&dest_addr) == 0)
-        { 
+        sscanf(line, "%s %s %s %s", dest, gw, mask, iface);
+        if (inet_aton(dest, &dest_addr) == 0)
+        {
             fprintf(stderr,
                     "Error loading routing table, cannot convert %s to valid IP\n",
                     dest);
-            return -1; 
+            return -1;
         }
-        if(inet_aton(gw,&gw_addr) == 0)
-        { 
+        if (inet_aton(gw, &gw_addr) == 0)
+        {
             fprintf(stderr,
                     "Error loading routing table, cannot convert %s to valid IP\n",
                     gw);
-            return -1; 
+            return -1;
         }
-        if(inet_aton(mask,&mask_addr) == 0)
-        { 
+        if (inet_aton(mask, &mask_addr) == 0)
+        {
             fprintf(stderr,
                     "Error loading routing table, cannot convert %s to valid IP\n",
                     mask);
-            return -1; 
+            return -1;
         }
-        if( clear_routing_table == 0 ){
+        if (clear_routing_table == 0)
+        {
             printf("Loading routing table from server, clear local routing table.\n");
             sr->routing_table = 0;
             clear_routing_table = 1;
         }
-        sr_add_rt_entry(sr,dest_addr,gw_addr,mask_addr,iface);
+        sr_add_rt_entry(sr, dest_addr, gw_addr, mask_addr, iface);
     } /* -- while -- */
 
     return 0; /* -- success -- */
@@ -90,45 +139,44 @@ int sr_load_rt(struct sr_instance* sr,const char* filename)
  *
  *---------------------------------------------------------------------*/
 
-void sr_add_rt_entry(struct sr_instance* sr, struct in_addr dest,
-struct in_addr gw, struct in_addr mask,char* if_name)
+void sr_add_rt_entry(struct sr_instance *sr, struct in_addr dest, struct in_addr gw, struct in_addr mask, char *if_name)
 {
-    struct sr_rt* rt_walker = 0;
+    struct sr_rt *rt_walker = 0;
 
     /* -- REQUIRES -- */
     assert(if_name);
     assert(sr);
 
     /* -- empty list special case -- */
-    if(sr->routing_table == 0)
+    if (sr->routing_table == 0)
     {
-        sr->routing_table = (struct sr_rt*)malloc(sizeof(struct sr_rt));
+        sr->routing_table = (struct sr_rt *)malloc(sizeof(struct sr_rt));
         assert(sr->routing_table);
         sr->routing_table->next = 0;
         sr->routing_table->dest = dest;
-        sr->routing_table->gw   = gw;
+        sr->routing_table->gw = gw;
         sr->routing_table->mask = mask;
-        strncpy(sr->routing_table->interface,if_name,sr_IFACE_NAMELEN);
+        strncpy(sr->routing_table->interface, if_name, sr_IFACE_NAMELEN);
 
         return;
     }
 
     /* -- find the end of the list -- */
     rt_walker = sr->routing_table;
-    while(rt_walker->next){
-      rt_walker = rt_walker->next; 
+    while (rt_walker->next)
+    {
+        rt_walker = rt_walker->next;
     }
 
-    rt_walker->next = (struct sr_rt*)malloc(sizeof(struct sr_rt));
+    rt_walker->next = (struct sr_rt *)malloc(sizeof(struct sr_rt));
     assert(rt_walker->next);
     rt_walker = rt_walker->next;
 
     rt_walker->next = 0;
     rt_walker->dest = dest;
-    rt_walker->gw   = gw;
+    rt_walker->gw = gw;
     rt_walker->mask = mask;
-    strncpy(rt_walker->interface,if_name,sr_IFACE_NAMELEN);
-
+    strncpy(rt_walker->interface, if_name, sr_IFACE_NAMELEN);
 } /* -- sr_add_entry -- */
 
 /*---------------------------------------------------------------------
@@ -136,11 +184,9 @@ struct in_addr gw, struct in_addr mask,char* if_name)
  *
  *---------------------------------------------------------------------*/
 
-void sr_print_routing_table(struct sr_instance* sr)
+void sr_print_routing_table(struct sr_instance *sr)
 {
-    struct sr_rt* rt_walker = 0;
-
-    if(sr->routing_table == 0)
+    if (sr->routing_table == 0)
     {
         printf(" *warning* Routing table empty \n");
         return;
@@ -148,15 +194,14 @@ void sr_print_routing_table(struct sr_instance* sr)
 
     printf("Destination\tGateway\t\tMask\tIface\n");
 
-    rt_walker = sr->routing_table;
-    
+    struct sr_rt *rt_walker = sr->routing_table;
+
     sr_print_routing_entry(rt_walker);
-    while(rt_walker->next)
+    while (rt_walker->next)
     {
-        rt_walker = rt_walker->next; 
+        rt_walker = rt_walker->next;
         sr_print_routing_entry(rt_walker);
     }
-
 } /* -- sr_print_routing_table -- */
 
 /*---------------------------------------------------------------------
@@ -164,15 +209,14 @@ void sr_print_routing_table(struct sr_instance* sr)
  *
  *---------------------------------------------------------------------*/
 
-void sr_print_routing_entry(struct sr_rt* entry)
+void sr_print_routing_entry(struct sr_rt *entry)
 {
     /* -- REQUIRES --*/
     assert(entry);
     assert(entry->interface);
 
-    printf("%s\t\t",inet_ntoa(entry->dest));
-    printf("%s\t",inet_ntoa(entry->gw));
-    printf("%s\t",inet_ntoa(entry->mask));
-    printf("%s\n",entry->interface);
-
+    printf("%s\t\t", inet_ntoa(entry->dest));
+    printf("%s\t", inet_ntoa(entry->gw));
+    printf("%s\t", inet_ntoa(entry->mask));
+    printf("%s\n", entry->interface);
 } /* -- sr_print_routing_entry -- */
