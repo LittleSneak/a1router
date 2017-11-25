@@ -748,12 +748,25 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 			tcphdr->checksum = cksum(tcphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
 		}
 		memcpy(ehdr->ether_shost, ext_if->addr, sizeof(uint8_t) * 6);
-	    memcpy(ehdr->ether_dhost, ext_if->addr, sizeof(uint8_t) * 6);
-		print_hdrs(packet, len);
 		iphdr->ip_src = ext_if->ip;
 		iphdr->ip_sum = 0;
 		iphdr->ip_sum = cksum(iphdr, sizeof(sr_ip_hdr_t));
-		sr_send_packet(sr, packet, len, "eth2");
+		/*Check arp cache*/
+		struct sr_arpentry *arpentry = sr_arpcache_lookup(&(sr->cache), iphdr->ip_dst);
+		if(arpentry != NULL){
+			memcpy(ehdr->ether_dhost, arpentry->mac, sizeof(uint8_t) * 6);
+			sr_send_packet(sr, packet, len, "eth2");
+			free(arpentry);
+			return;
+		}
+		/*Not in cache, send ARP requests*/
+		else{
+			sr_arpcache_queuereq(&(sr->cache),
+                                    iphdr->ip_dst,
+                                    packet,
+                                    len,
+                                    "eth2");
+		}
 	}
 	
 	/* Packet coming from external */
