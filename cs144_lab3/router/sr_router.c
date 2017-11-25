@@ -838,6 +838,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 		iphdr->ip_dst = mapping->ip_int;
 		iphdr->ip_sum = 0;
 		iphdr->ip_sum = cksum(iphdr, sizeof(sr_ip_hdr_t));
+		print_hdrs(packet, len);
 		sr_send_packet(sr, packet, len, "eth1");
 	}
 }
