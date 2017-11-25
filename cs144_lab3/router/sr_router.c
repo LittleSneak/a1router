@@ -462,6 +462,8 @@ void sr_handlepacket(struct sr_instance* sr,
 	  
 	  /*arp packet is a reply*/
 	  else{
+		  printf("ARP REPLY\n");
+		  fflush(stdout);
 		  /*check if the reply is for this router*/
 		  if_walker = sr->if_list;
 		  while(if_walker){
@@ -478,16 +480,18 @@ void sr_handlepacket(struct sr_instance* sr,
 			  struct sr_packet *req_walker = requests->packets;
 			  /*Go through all the queued packets and send them*/
 			  while(req_walker != NULL){
+				  printf("HANDLING\n");
+		  fflush(stdout);
 				  ehdr = (sr_ethernet_hdr_t *) req_walker->buf;
 				  memcpy(ehdr->ether_dhost, arp_hdr->ar_tha, sizeof(ehdr->ether_dhost));
 				  memcpy(ehdr->ether_shost, if_walker->addr, sizeof(ehdr->ether_dhost));
 				  if_walker = sr->if_list;
-                                  while(if_walker){
-                                      if(memcmp(if_walker->addr, arp_hdr->ar_tha, sizeof(unsigned char) * 6) == 0){
-                                          break;
-                                      }
-                                      if_walker = if_walker->next;
-                                  }
+                  while(if_walker){
+                      if(memcmp(if_walker->addr, arp_hdr->ar_tha, sizeof(unsigned char) * 6) == 0){
+                      break;
+                      }
+                      if_walker = if_walker->next;
+                  }
 				  sr_send_packet(sr /* borrowed */,
                                       req_walker->buf /* borrowed */ ,
                                       req_walker->len,
