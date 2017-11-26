@@ -718,7 +718,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 			/* Find connection, insert if it does not exist */
 			connection = sr_nat_lookup_connection(sr->nat, mapping, iphdr->ip_dst);
 			if(connection == NULL){
-				connection = sr_nat_insert_connection(sr->nat, mapping, iphdr->ip_dst);
+				connection = sr_nat_insert_connection(sr->nat, iphdr->ip_src, tcphdr->src_port, iphdr->ip_dst);
 			}
 			
 			pthread_mutex_lock(&(sr->nat->lock));

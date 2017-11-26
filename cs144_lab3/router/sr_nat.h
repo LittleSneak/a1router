@@ -88,8 +88,8 @@ struct sr_nat_mapping *sr_nat_lookup_internal(struct sr_nat *nat,
 struct sr_nat_mapping *sr_nat_insert_mapping(struct sr_nat *nat,
   uint32_t ip_int, uint16_t aux_int, sr_nat_mapping_type type );
   
-struct sr_nat_connection * sr_nat_insert_connection(struct sr_nat *nat, struct sr_nat_mapping *mapping, 
-  uint32_t ip);
+struct sr_nat_connection * sr_nat_insert_connection(struct sr_nat *nat, 
+  uint32_t ip_int, uint16_t aux_int, uint32_t ip);
 
 struct sr_nat_connection *sr_nat_lookup_connection(struct sr_nat *nat, 
   struct sr_nat_mapping *mapping, uint32_t ip);

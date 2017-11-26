@@ -291,8 +291,17 @@ struct sr_nat_mapping *sr_nat_insert_mapping(struct sr_nat *nat,
 }
 
 /* Insert a connection to a mapping */
-struct sr_nat_connection * sr_nat_insert_connection(struct sr_nat *nat, struct sr_nat_mapping *mapping, uint32_t ip){
+struct sr_nat_connection * sr_nat_insert_connection(struct sr_nat *nat, uint32_t ip_int, uint16_t aux_int, uint32_t ip){
 	pthread_mutex_lock(&(nat->lock));
+	struct *sr_nat_mapping mapping = nat->mappings;
+	while(mapping != NULL){
+		if(mapping->type == nat_mapping_tcp && mapping->aux_int == aux_int && mapping->ip_int == ip_int){
+		    break;
+	    }
+    }
+	if (mapping == NULL){
+		return;
+	}
 	struct sr_nat_connection *newConn = (struct sr_nat_connection *) malloc(sizeof(struct sr_nat_connection));
 	newConn->ip = ip;
 	newConn->last_updated = time(NULL);
