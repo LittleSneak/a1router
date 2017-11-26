@@ -835,12 +835,12 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 			tcphdr->checksum = cksum(tcphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
 		}
 		memcpy(ehdr->ether_dhost, int_if->addr, sizeof(uint8_t) * 6);
+		memcpy(ehdr->ether_shost, ext_if->addr, sizeof(uint8_t) * 6);
 		iphdr->ip_dst = mapping->ip_int;
 		iphdr->ip_sum = 0;
 		iphdr->ip_sum = cksum(iphdr, sizeof(sr_ip_hdr_t));
 		print_hdrs(packet, len);
-		sr_send_packet(sr, packet, len, "eth2");
-		sr_print_if_list(sr);
+		sr_send_packet(sr, packet, len, "eth1");
 	}
 }
 
