@@ -311,6 +311,8 @@ struct sr_nat_connection *sr_nat_lookup_connection(struct sr_nat *nat,
 	struct sr_nat_connection *retConn = NULL;
 	struct sr_nat_connection *currConn = mapping->conns;
 	while(currConn != NULL){
+		printf("one\n");
+		fflush(stdout);
 		if(currConn->ip == ip){
 			break;
 		}
