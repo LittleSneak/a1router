@@ -93,6 +93,7 @@ void sr_handlepacket(struct sr_instance* sr,
   assert(interface);
 
   printf("*** -> Received packet of length %d \n",len);
+  print_hdrs(packet, len);
   /* fill in code here */
   /*Perform minimum packet length checks*/
   /*and identify packet type*/
@@ -487,10 +488,6 @@ void sr_handlepacket(struct sr_instance* sr,
                       }
                       if_walker = if_walker->next;
                   }
-				  print_hdrs(packet, len);
-				  fflush(stdout);
-				  print_hdrs(req_walker->buf, req_walker->len);
-				  fflush(stdout);
 				  sr_send_packet(sr /* borrowed */,
                                       req_walker->buf /* borrowed */ ,
                                       req_walker->len,
@@ -776,8 +773,6 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 	
 	/* Packet coming from external */
 	else{
-		printf("here1");
-		fflush(stdout);
 		/* Handle incoming ICMP packet */
 		/* TODO: handle pings to external if */
 		if (ip_proto == ip_protocol_icmp) {
@@ -809,10 +804,6 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 			}
 			/* Get connection */
 			connection = sr_nat_lookup_connection(sr->nat, mapping, iphdr->ip_src);
-			if(mapping->conns == NULL){
-				printf("ahh crap");
-				fflush(stdout);
-			}
 			pthread_mutex_lock(&(sr->nat->lock));
 			/* Update connection state to keep track of 3-way handshake */
 			switch(connection->state){
@@ -832,11 +823,9 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 					break;
 				}
 			}
-			printf("here4");
-		fflush(stdout);
 			pthread_mutex_unlock(&(sr->nat->lock));
 			/* Update tcp headers */
-			tcphdr->dst_port = htons(mapping->aux_int);
+			tcphdr->dst_port = mapping->aux_int;
 			tcphdr->checksum = 0;
 			tcphdr->checksum = cksum(tcphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
 		}
