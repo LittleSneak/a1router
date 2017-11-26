@@ -91,8 +91,6 @@ void *sr_nat_timeout(void *nat_ptr) {  /* Periodic Timout handling */
     sleep(1.0);
     pthread_mutex_lock(&(nat->lock));
 
-	printf("hereloop\n");
-	fflush(stdout);
     time_t curtime = time(NULL);
 
     /* Iterate through mappings */
@@ -188,8 +186,6 @@ void *sr_nat_timeout(void *nat_ptr) {  /* Periodic Timout handling */
 			currIncoming = currIncoming->next;
 		}
 	}
-	printf("hereloop2\n");
-	fflush(stdout);
 	pthread_mutex_unlock(&(nat->lock));
   }
   return NULL;
@@ -234,7 +230,11 @@ struct sr_nat_mapping *sr_nat_lookup_external(struct sr_nat *nat,
 struct sr_nat_mapping *sr_nat_lookup_internal(struct sr_nat *nat,
   uint32_t ip_int, uint16_t aux_int, sr_nat_mapping_type type ) {
 
+  printf("stuck\n");
+  fflush(stdout);
   pthread_mutex_lock(&(nat->lock));
+  printf("not\n");
+  fflush(stdout);
 
   struct sr_nat_mapping *mapping = nat->mappings;
   /* Look for mapping */
@@ -306,6 +306,7 @@ struct sr_nat_connection * sr_nat_insert_connection(struct sr_nat *nat, uint32_t
 		mapping = mapping->next;
     }
 	if (mapping == NULL){
+		pthread_mutex_unlock(&(nat->lock));
 		return newConn;
 	}
 	newConn->ip = ip;
