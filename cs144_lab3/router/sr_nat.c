@@ -91,6 +91,8 @@ void *sr_nat_timeout(void *nat_ptr) {  /* Periodic Timout handling */
     sleep(1.0);
     pthread_mutex_lock(&(nat->lock));
 
+	printf("hereloop\n");
+	fflush(stdout);
     time_t curtime = time(NULL);
 
     /* Iterate through mappings */
@@ -186,6 +188,8 @@ void *sr_nat_timeout(void *nat_ptr) {  /* Periodic Timout handling */
 			currIncoming = currIncoming->next;
 		}
 	}
+	printf("hereloop2\n");
+	fflush(stdout);
 	pthread_mutex_unlock(&(nat->lock));
   }
   return NULL;
