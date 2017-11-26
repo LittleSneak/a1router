@@ -674,7 +674,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 	if(ip_proto == 0x0011){
 		return;
 	}
-	
+	print_hdrs(packet, len);
 	/* Packet coming from internal */
 	if(strncmp(interface, "eth1", 4) == 0){
 		/* IP packet sent to our interface, port unreachable */
@@ -753,7 +753,6 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 		iphdr->ip_sum = 0;
 		iphdr->ip_sum = cksum(iphdr, sizeof(sr_ip_hdr_t));
 		/*Check arp cache*/
-		print_hdrs(packet, len);
 		struct sr_arpentry *arpentry = sr_arpcache_lookup(&(sr->cache), iphdr->ip_dst);
 		if(arpentry != NULL){
 			memcpy(ehdr->ether_dhost, arpentry->mac, sizeof(uint8_t) * 6);
