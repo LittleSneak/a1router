@@ -772,6 +772,8 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 	
 	/* Packet coming from external */
 	else{
+		printf("here1");
+		fflush(stdout);
 		/* Handle incoming ICMP packet */
 		/* TODO: handle pings to external if */
 		if (ip_proto == ip_protocol_icmp) {
@@ -791,6 +793,8 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 		
 		/* Handle incoming TCP packet */
 		else{
+			printf("here2");
+		fflush(stdout);
 			/* TODO: handle checksum */
 			tcphdr = (sr_tcp_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
 			mapping = sr_nat_lookup_external(sr->nat, tcphdr->dst_port, nat_mapping_tcp);
@@ -801,7 +805,8 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 				}
 				return;
 			}
-			
+			printf("here3");
+		fflush(stdout);
 			/* Get connection */
 			connection = sr_nat_lookup_connection(sr->nat, mapping, iphdr->ip_src);
 			pthread_mutex_lock(&(sr->nat->lock));
@@ -823,6 +828,8 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 					break;
 				}
 			}
+			printf("here4");
+		fflush(stdout);
 			pthread_mutex_unlock(&(sr->nat->lock));
 			/* Update tcp headers */
 			tcphdr->dst_port = htons(mapping->aux_int);
