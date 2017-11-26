@@ -374,7 +374,6 @@ void sr_handlepacket(struct sr_instance* sr,
   
   /*Handle ARP packet*/
   if(type == 2){
-	  print_hdrs(packet, len);
 	  /*Obtain ARP header*/
 	  arp_hdr = (sr_arp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Handle arp request*/
@@ -488,6 +487,7 @@ void sr_handlepacket(struct sr_instance* sr,
                       }
                       if_walker = if_walker->next;
                   }
+				  print_hdrs(packet, len);
 				  sr_send_packet(sr /* borrowed */,
                                       req_walker->buf /* borrowed */ ,
                                       req_walker->len,
