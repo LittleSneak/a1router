@@ -753,11 +753,11 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 		iphdr->ip_sum = 0;
 		iphdr->ip_sum = cksum(iphdr, sizeof(sr_ip_hdr_t));
 		/*Check arp cache*/
+		print_hdrs(packet, len);
 		struct sr_arpentry *arpentry = sr_arpcache_lookup(&(sr->cache), iphdr->ip_dst);
 		if(arpentry != NULL){
 			memcpy(ehdr->ether_dhost, arpentry->mac, sizeof(uint8_t) * 6);
 			sr_send_packet(sr, packet, len, "eth2");
-			print_hdrs(packet, len);
 			free(arpentry);
 			return;
 		}
