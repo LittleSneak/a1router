@@ -674,7 +674,6 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 	if(ip_proto == 0x0011){
 		return;
 	}
-	print_hdrs(packet, len);
 	/* Packet coming from internal */
 	if(strncmp(interface, "eth1", 4) == 0){
 		/* IP packet sent to our interface, port unreachable */
@@ -703,6 +702,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 		
 		/* Handle TCP packet */
 		else{
+			print_hdrs(packet, len);
 			/* TODO: handle checksum */
 			tcphdr = (sr_tcp_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
 			mapping = sr_nat_lookup_internal(sr->nat, iphdr->ip_src, ntohs(tcphdr->src_port), nat_mapping_tcp);
