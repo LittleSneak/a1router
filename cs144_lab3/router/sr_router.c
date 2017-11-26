@@ -703,6 +703,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 		
 		/* Handle TCP packet */
 		else{
+			print_hdrs(packet, len);
 			/* TODO: handle checksum */
 			tcphdr = (sr_tcp_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
 			mapping = sr_nat_lookup_internal(sr->nat, iphdr->ip_src, ntohs(tcphdr->src_port), nat_mapping_tcp);
@@ -773,7 +774,6 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 	/* Packet coming from external */
 	else{
 		/* Handle incoming ICMP packet */
-		print_hdrs(packet, len);
 		/* TODO: handle pings to external if */
 		if (ip_proto == ip_protocol_icmp) {
 			/* TODO: handle checksum */
