@@ -488,7 +488,9 @@ void sr_handlepacket(struct sr_instance* sr,
                       if_walker = if_walker->next;
                   }
 				  print_hdrs(packet, len);
-				  /*print_hdrs(req_walker->buf, req_walker->len);*/
+				  fflush(stdout);
+				  print_hdrs(req_walker->buf, req_walker->len);
+				  fflush(stdout);
 				  sr_send_packet(sr /* borrowed */,
                                       req_walker->buf /* borrowed */ ,
                                       req_walker->len,
