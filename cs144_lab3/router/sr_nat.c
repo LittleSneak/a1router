@@ -204,6 +204,7 @@ struct sr_nat_mapping *sr_nat_lookup_external(struct sr_nat *nat,
 	  if(mapping->type == type && mapping->aux_ext == aux_ext){
 		  break;
 	  }
+	  mapping = mapping->next;
   }
   /* handle lookup here, malloc and assign to copy */
   struct sr_nat_mapping *copy = NULL;
@@ -238,6 +239,7 @@ struct sr_nat_mapping *sr_nat_lookup_internal(struct sr_nat *nat,
 	  if(mapping->type == type && mapping->aux_int == aux_int && mapping->ip_int == ip_int){
 		  break;
 	  }
+	  mapping = mapping->next;
   }
   /* handle lookup here, malloc and assign to copy */
   struct sr_nat_mapping *copy = NULL;

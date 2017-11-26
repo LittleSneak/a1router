@@ -707,15 +707,9 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 			/* TODO: handle checksum */
 			tcphdr = (sr_tcp_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
 			mapping = sr_nat_lookup_internal(sr->nat, iphdr->ip_src, ntohs(tcphdr->src_port), nat_mapping_tcp);
-			printf("hi\n");
-  fflush(stdout);
 			/* No mapping yet, add it */
 			if(mapping == NULL){
-				printf("stuck\n");
-  fflush(stdout);
 				mapping = sr_nat_insert_mapping(sr->nat, iphdr->ip_src, tcphdr->src_port, nat_mapping_tcp);
-				printf("not\n");
-  fflush(stdout);
 			}
 			printf("here2\n");
 			fflush(stdout);
