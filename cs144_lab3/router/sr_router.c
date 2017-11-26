@@ -719,7 +719,6 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 			connection = sr_nat_lookup_connection(sr->nat, mapping, iphdr->ip_dst);
 			if(connection == NULL){
 				connection = sr_nat_insert_connection(sr->nat, mapping, iphdr->ip_dst);
-				
 			}
 			
 			pthread_mutex_lock(&(sr->nat->lock));
@@ -810,7 +809,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 			}
 			/* Get connection */
 			connection = sr_nat_lookup_connection(sr->nat, mapping, iphdr->ip_src);
-			if(connection == NULL){
+			if(mapping->conns == NULL){
 				printf("ahh crap");
 				fflush(stdout);
 			}
