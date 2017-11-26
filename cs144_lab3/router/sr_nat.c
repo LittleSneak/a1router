@@ -186,7 +186,7 @@ void *sr_nat_timeout(void *nat_ptr) {  /* Periodic Timout handling */
 			currIncoming = currIncoming->next;
 		}
 	}
-    pthread_mutex_unlock(&(nat->lock));
+	pthread_mutex_unlock(&(nat->lock));
   }
   return NULL;
 }
@@ -210,6 +210,7 @@ struct sr_nat_mapping *sr_nat_lookup_external(struct sr_nat *nat,
   
   /* No mapping found */
   if(mapping == NULL){
+	  pthread_mutex_unlock(&(nat->lock));
 	  return copy;
   }
   /* Mapping found, make a copy */
@@ -243,6 +244,7 @@ struct sr_nat_mapping *sr_nat_lookup_internal(struct sr_nat *nat,
   
   /* No mapping found */
   if(mapping == NULL){
+	  pthread_mutex_unlock(&(nat->lock));
 	  return copy;
   }
   
@@ -314,6 +316,7 @@ struct sr_nat_connection *sr_nat_lookup_connection(struct sr_nat *nat,
 		}
 	}
 	if(currConn == NULL){
+		pthread_mutex_unlock(&(nat->lock));
 		return retConn;
 	}
 	currConn->last_updated = time(NULL);

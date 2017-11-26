@@ -487,7 +487,6 @@ void sr_handlepacket(struct sr_instance* sr,
                       }
                       if_walker = if_walker->next;
                   }
-				  print_hdrs(req_walker->buf, req_walker->len);
 				  sr_send_packet(sr /* borrowed */,
                                       req_walker->buf /* borrowed */ ,
                                       req_walker->len,
@@ -793,7 +792,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 		/* Handle incoming TCP packet */
 		else{
 			/* TODO: handle checksum */
-			tcphdr = (sr_tcp_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
+			tcphdr = (sr_tcp_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
 			mapping = sr_nat_lookup_external(sr->nat, tcphdr->dst_port, nat_mapping_tcp);
 			/* Mapping not found add to incoming list if it is SYN */
 			if(mapping == NULL){
