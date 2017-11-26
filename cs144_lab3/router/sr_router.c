@@ -374,6 +374,7 @@ void sr_handlepacket(struct sr_instance* sr,
   
   /*Handle ARP packet*/
   if(type == 2){
+	  print_hdrs(packet, len);
 	  /*Obtain ARP header*/
 	  arp_hdr = (sr_arp_hdr_t *)(packet + sizeof(sr_ethernet_hdr_t));
 	  /*Handle arp request*/
@@ -587,7 +588,6 @@ void send_icmp_type_3 (uint8_t code, unsigned int len, uint8_t *packet, struct s
 	/* The original packet was an ARP packet */
 	else{
 		sr_arp_hdr_t *arphdr = (sr_arp_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t));
-		print_hdrs(packet, len);
 			
 		/* Set up IP header */
 		retIPhdr->ip_tos = 0;
