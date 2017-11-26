@@ -702,7 +702,8 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 		
 		/* Handle TCP packet */
 		else{
-			print_hdrs(packet, len);
+			printf("here1\n");
+			fflush(stdout);
 			/* TODO: handle checksum */
 			tcphdr = (sr_tcp_hdr_t *) (packet + sizeof(sr_ethernet_hdr_t) + sizeof(sr_ip_hdr_t));
 			mapping = sr_nat_lookup_internal(sr->nat, iphdr->ip_src, ntohs(tcphdr->src_port), nat_mapping_tcp);
@@ -710,13 +711,15 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 			if(mapping == NULL){
 				mapping = sr_nat_insert_mapping(sr->nat, iphdr->ip_src, tcphdr->src_port, nat_mapping_tcp);
 			}
-			
+			printf("here2\n");
+			fflush(stdout);
 			/* Find connection, insert if it does not exist */
 			connection = sr_nat_lookup_connection(sr->nat, mapping, iphdr->ip_dst);
 			if(connection == NULL){
 				connection = sr_nat_insert_connection(sr->nat, iphdr->ip_src, tcphdr->src_port, iphdr->ip_dst);
 			}
-			
+			printf("here3\n");
+			fflush(stdout);
 			pthread_mutex_lock(&(sr->nat->lock));
 			/* Update connection state to keep track of 3-way handshake */
 			switch(connection->state){
@@ -742,11 +745,15 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 					break;
 				}
 			}
+			printf("here4\n");
+			fflush(stdout);
 			pthread_mutex_unlock(&(sr->nat->lock));
 			/* Update tcp headers */
 			tcphdr->src_port = mapping->aux_ext;
 			tcphdr->checksum = 0;
 			tcphdr->checksum = cksum(tcphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
+			printf("here5\n");
+			fflush(stdout);
 		}
 		memcpy(ehdr->ether_shost, ext_if->addr, sizeof(uint8_t) * 6);
 		iphdr->ip_src = ext_if->ip;
