@@ -230,11 +230,7 @@ struct sr_nat_mapping *sr_nat_lookup_external(struct sr_nat *nat,
 struct sr_nat_mapping *sr_nat_lookup_internal(struct sr_nat *nat,
   uint32_t ip_int, uint16_t aux_int, sr_nat_mapping_type type ) {
 
-  printf("stuck\n");
-  fflush(stdout);
   pthread_mutex_lock(&(nat->lock));
-  printf("not\n");
-  fflush(stdout);
 
   struct sr_nat_mapping *mapping = nat->mappings;
   /* Look for mapping */
