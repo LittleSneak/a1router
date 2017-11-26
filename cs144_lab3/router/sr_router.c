@@ -748,7 +748,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 			}
 			pthread_mutex_unlock(&(sr->nat->lock));
 			/* Update tcp headers */
-			tcphdr->src_port = htons(mapping->aux_ext);
+			tcphdr->src_port = mapping->aux_ext;
 			tcphdr->checksum = 0;
 			tcphdr->checksum = cksum(tcphdr, len - sizeof(sr_ethernet_hdr_t) - sizeof(sr_ip_hdr_t));
 		}

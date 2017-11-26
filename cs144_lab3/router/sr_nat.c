@@ -273,7 +273,7 @@ struct sr_nat_mapping *sr_nat_insert_mapping(struct sr_nat *nat,
   newMapping->ip_int = ip_int; /* internal ip addr */
   newMapping->ip_ext = ext_if->ip; /* external ip addr */
   newMapping->aux_int = aux_int; /* internal port or icmp id */
-  newMapping->aux_ext = next_port; /* external port or icmp id */
+  newMapping->aux_ext = htons(next_port); /* external port or icmp id */
   next_port++;
   newMapping->last_updated = time(NULL); /* use to timeout mappings */
   newMapping->conns = NULL; /* list of connections. null for ICMP */
