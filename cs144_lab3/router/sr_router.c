@@ -478,7 +478,7 @@ void sr_handlepacket(struct sr_instance* sr,
 			  /*Go through all the queued packets and send them*/
 			  while(req_walker != NULL){
 				  ehdr = (sr_ethernet_hdr_t *) req_walker->buf;
-				  memcpy(ehdr->ether_dhost, arp_hdr->ar_tha, sizeof(ehdr->ether_dhost));
+				  memcpy(ehdr->ether_dhost, arp_hdr->ar_sha, sizeof(ehdr->ether_dhost));
 				  memcpy(ehdr->ether_shost, if_walker->addr, sizeof(ehdr->ether_dhost));
 				  if_walker = sr->if_list;
                   while(if_walker){
