@@ -773,7 +773,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 	/* Packet coming from external */
 	else{
 		/* Handle incoming ICMP packet */
-		
+		print_hdrs(packet, len);
 		/* TODO: handle pings to external if */
 		if (ip_proto == ip_protocol_icmp) {
 			/* TODO: handle checksum */
