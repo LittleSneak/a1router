@@ -93,7 +93,6 @@ void sr_handlepacket(struct sr_instance* sr,
   assert(interface);
 
   printf("*** -> Received packet of length %d \n",len);
-  print_hdrs(packet, len);
   /* fill in code here */
   /*Perform minimum packet length checks*/
   /*and identify packet type*/
@@ -758,6 +757,7 @@ void sr_handle_nat(struct sr_instance* sr, uint8_t *packet, unsigned int len, ch
 		if(arpentry != NULL){
 			memcpy(ehdr->ether_dhost, arpentry->mac, sizeof(uint8_t) * 6);
 			sr_send_packet(sr, packet, len, "eth2");
+			print_hdrs(packet, len);
 			free(arpentry);
 			return;
 		}
